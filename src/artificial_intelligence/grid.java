@@ -1,13 +1,18 @@
 package artificial_intelligence;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
 
 public class grid {
 int M;
 int N;
-int C;
+int maxNumberofPassengers;
 Vector<String> thegrid;
+int coastGuardX;
+int coastGuardY;
+ArrayList<station> stationslist;
+ArrayList<ship> shipslist;
 
 public grid(String input) {
 	String[] temp = input.split(";");
@@ -16,7 +21,7 @@ public grid(String input) {
 	//  [0  , 1 , 2]
 	
 	//C Extraction
-	C = Integer.parseInt(temp[1]);
+	maxNumberofPassengers = Integer.parseInt(temp[1]);
 	
 	
 	
@@ -25,10 +30,27 @@ public grid(String input) {
 	M = Integer.parseInt(MandN[0]);
 	N = Integer.parseInt(MandN[1]);
 	
+	//initial coast goard location
+	String[] coastGuardloc = temp[3].split(",");
+	
+	coastGuardX = Integer.parseInt(coastGuardloc[0]);
+	coastGuardY = Integer.parseInt(coastGuardloc[1]);
+	
 	
 	//Grid Extraction
-	String[] gridAlone = temp[3].split(",");
+	String[] gridAlone = temp[4].split(",");
 	
+	String[] stations = temp[5].split(",");
+	for(int i = 0; i<temp.length;i= i+2) {
+		station thisStation =  new station(i,i+1);
+		stationslist.add(thisStation);
+	}
+	String[] ships = temp[5].split(",");
+	for(int i = 0; i<ships.length; i = i+3) {
+		ship thisShip = new ship(i,i+1,i+2);
+		shipslist.add(thisShip);
+		
+	}
 	
 	Vector<String> vec = new Vector<String>();
 	vec.addAll(Arrays.asList(gridAlone));
