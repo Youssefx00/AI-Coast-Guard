@@ -1,20 +1,9 @@
 package artificial_intelligence;
 
-public class CoastGuard {
+public class CoastGuard extends GenericSearchProblem{
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	public String  solve(String grid,String strategy,Boolean visualize) {
-		
-		
+	public static String Solve(String grid,String strategy,Boolean visualize) {
 		
 		String Final_Solution = null;
 		grid FirstGrid = new grid(grid);
@@ -41,5 +30,21 @@ public class CoastGuard {
 			
 		}
 		return Final_Solution;
-}
+	}
+	public void General_Search_Procedure(GenericSearchProblem x, String strat) {
+		
+	}
+	public void Best_First_Search(GenericSearchProblem x, String strat) {
+		
+	}
+	@Override
+	Boolean GoalTest() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	int PathCost() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
