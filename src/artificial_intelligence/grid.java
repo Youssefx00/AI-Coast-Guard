@@ -2,6 +2,7 @@ package artificial_intelligence;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.Vector;
 
 public class grid {
@@ -168,5 +169,97 @@ public boolean possiblemove(operator operating,int x, int y) {
 }
 	
 
+
+public String GenGrid() {
+	String theString= "";
+	int sizem = 5 +  (int)(Math.random() * ((5 - 15) + 1)); 
+	int sizen = 5 +  (int)(Math.random() * ((4 - 15) + 1));
+	theString = theString + sizem + ",";
+	theString = theString + sizen + ";";
+	
+	int coastGuardmax =  30+  (int)(Math.random() * ((30 - 100) + 1));
+	theString = theString + coastGuardmax+ ";";
+	
+	int coastGuardX =   (int)(Math.random() * ((sizem) + 1));
+	int coastGuardY =  (int)(Math.random() * ((sizen) + 1));
+	theString = theString + coastGuardX+ ","+ coastGuardY+ ";";
+
+	
+	
+	
+	int shipx= 0;
+	int shipy=0;
+	int shipPassengers=(int)(Math.random() * ((100) + 1));
+	String shipstring = "";
+	while(true) {
+		shipx =  (int)(Math.random() * ((sizem) + 1));
+		shipy=  (int)(Math.random() * ((sizem) + 1));
+		if(shipx != coastGuardX && shipy != coastGuardY) {
+			shipstring = shipstring + shipx + "," + shipy+ "," +shipPassengers+",";
+			
+		break;
+		}
+	}
+		
+	int stationx= 0;
+	int stationy=1;
+	String stationstring = "";
+	while(true) {
+		stationx =  (int)(Math.random() * ((sizem-1) + 1));
+		stationy=  (int)(Math.random() * ((sizem-1) + 1));
+		
+		if(stationx != coastGuardX && stationy != coastGuardY) {
+			if(stationx != shipx && stationy != shipy) {
+				stationstring = stationstring + stationx + "," + stationy+ ",";
+			break;
+			
+		}
+			
+		}
+		
+	}
+	
+	
+	
+	
+	
+	
+	for(int x = 0; x<sizem;x++) {
+		for(int y = 0; y<sizen;y++ ) {
+			if(x == stationx && y == stationy) {
+				
+			}else
+			if(x == shipx && y == shipy) {
+				
+			}else
+			if(x == coastGuardX && y == coastGuardY) {
+				
+			}else {
+			int luckofthedraw = (int)(Math.random() * ((10) + 1));
+			if(luckofthedraw==10) {
+				stationstring = stationstring +x +","+ y+ ";";
+			}
+			if(luckofthedraw== 9) {
+				int currshipPassengers=(int)(Math.random() * ((100) + 1));
+				shipstring = shipstring +x +","+ y+ ","+ currshipPassengers + ",";
+			}
+			
+			
+			
+			
+		}
+			}
+		
+		
+	}
+		theString = theString+ stationstring +";" + shipstring+";";
+	
+	
+		
+	
+	
+	return theString;
+	
+}
 
 }
