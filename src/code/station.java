@@ -1,4 +1,4 @@
-package artificial_intelligence;
+package code;
 
 public class station {
 	int x;
