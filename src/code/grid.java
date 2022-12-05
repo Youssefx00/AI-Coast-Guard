@@ -17,6 +17,7 @@ ArrayList<ship> shipslist;
 int[] visited;
 
 
+
 public grid(String input) {
 	String[] temp = input.split(";");
 	//	Now The String is split into Three Different sectors and should look like this
@@ -76,14 +77,55 @@ public int distance_to_target(int PlayerX, int PlayerY,int TargetX, int TargetY)
 
 public int[] nearest_Human_ship(int x, int y) {
 	
-	int[] output = {0,0};
-	int min = 0;
+	int [] shipLocation = {-1,-1};
+	int min = 225;
 	for(int i = 0; i<shipslist.size();i++) {
-		
+		if(shipslist.get(i).are_there_people_here()) {
+			int shipDistance = distance_to_target(x , y , shipslist.get(i).x,shipslist.get(i).y);
+			if(shipDistance < min) {
+				min = shipDistance;
+				shipLocation[0] = shipslist.get(i).x;
+				shipLocation[1] = shipslist.get(i).y;
+				}
+			}
+		}
+	
+	return shipLocation;
+	
+}
+
+public int[] nearest_Blackbox(int x, int y) {
+	
+	int [] shipLocation = {-1,-1};
+	int min = 225;
+	for(int i = 0; i<shipslist.size();i++) {
+		if(shipslist.get(i).hasBlackBox) {
+			int shipDistance = distance_to_target(x , y , shipslist.get(i).x,shipslist.get(i).y);
+			if(shipDistance < min) {
+				min = shipDistance;
+				shipLocation[0] = shipslist.get(i).x;
+				shipLocation[1] = shipslist.get(i).y;
+				}
+			}
+		}
+	
+	return shipLocation;
+	
+}
+
+
+
+
+
+
+
+public ship getShip(int x,int y){
+	for(int i = 0;i<shipslist.size();i++) {
+		if(shipslist.get(i).x== x && shipslist.get(i).y==y) {
+			return shipslist.get(i);
+		}
 	}
-	
-	return output;
-	
+	return null;
 }
 
 
