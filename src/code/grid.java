@@ -2,6 +2,7 @@ package code;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.Vector;
 
 public class grid {
@@ -14,6 +15,7 @@ int coastGuardY;
 ArrayList<station> stationslist;
 ArrayList<ship> shipslist;
 int[] visited;
+
 
 
 public grid(String input) {
@@ -62,6 +64,104 @@ public grid(String input) {
 
 }
 
+public int distance_to_target(int PlayerX, int PlayerY,int TargetX, int TargetY) {
+	int total = 0;
+	int x = PlayerX - TargetX;
+	int y = PlayerY - TargetY;
+	x = Math.abs(x);
+	y = Math.abs(y);
+	total = x+y;
+	return total;
+	
+}
+
+public int[] nearest_Human_ship(int x, int y) {
+	
+	int [] shipLocation = {-1,-1};
+	int min = 225;
+	for(int i = 0; i<shipslist.size();i++) {
+		if(shipslist.get(i).are_there_people_here()) {
+			int shipDistance = distance_to_target(x , y , shipslist.get(i).x,shipslist.get(i).y);
+			if(shipDistance < min) {
+				min = shipDistance;
+				shipLocation[0] = shipslist.get(i).x;
+				shipLocation[1] = shipslist.get(i).y;
+				}
+			}
+		}
+	
+	return shipLocation;
+	
+}
+
+public int[] nearest_Blackbox(int x, int y) {
+	
+	int [] shipLocation = {-1,-1};
+	int min = 225;
+	for(int i = 0; i<shipslist.size();i++) {
+		if(shipslist.get(i).hasBlackBox) {
+			int shipDistance = distance_to_target(x , y , shipslist.get(i).x,shipslist.get(i).y);
+			if(shipDistance < min) {
+				min = shipDistance;
+				shipLocation[0] = shipslist.get(i).x;
+				shipLocation[1] = shipslist.get(i).y;
+				}
+			}
+		}
+	
+	return shipLocation;
+	
+}
+
+
+
+
+
+
+
+public ship getShip(int x,int y){
+	for(int i = 0;i<shipslist.size();i++) {
+		if(shipslist.get(i).x== x && shipslist.get(i).y==y) {
+			return shipslist.get(i);
+		}
+	}
+	return null;
+}
+
+
+
+public boolean are_there_BlackBoxes() {
+	
+	for(int i = 0; i<shipslist.size();i++) {
+		if(shipslist.get(i).hasBlackBox) {
+			return true;
+		}
+		
+	}
+	
+	
+	return false;
+}
+
+
+
+public boolean are_there_humans() {
+	
+	for(int i = 0; i<shipslist.size();i++) {
+		if(shipslist.get(i).are_there_people_here()) {
+			return true;
+		}
+		
+	}
+	
+	
+	return false;
+}
+
+
+
+
+
 public int isThisAShip(int x,int y){
 	for(int i = 0;i<shipslist.size();i++) {
 		if(shipslist.get(i).x== x && shipslist.get(i).y==y) {
@@ -80,8 +180,7 @@ public int isThisAStation(int x,int y){
 	return -1;
 }
 
-
-
+ 
 public boolean possiblemove(operator operating,int x, int y) {
 	
 	
@@ -168,5 +267,97 @@ public boolean possiblemove(operator operating,int x, int y) {
 }
 	
 
+
+public String GenGrid() {
+	String theString= "";
+	int sizem = 5 +  (int)(Math.random() * ((5 - 15) + 1)); 
+	int sizen = 5 +  (int)(Math.random() * ((4 - 15) + 1));
+	theString = theString + sizem + ",";
+	theString = theString + sizen + ";";
+	
+	int coastGuardmax =  30+  (int)(Math.random() * ((30 - 100) + 1));
+	theString = theString + coastGuardmax+ ";";
+	
+	int coastGuardX =   (int)(Math.random() * ((sizem) + 1));
+	int coastGuardY =  (int)(Math.random() * ((sizen) + 1));
+	theString = theString + coastGuardX+ ","+ coastGuardY+ ";";
+
+	
+	
+	
+	int shipx= 0;
+	int shipy=0;
+	int shipPassengers=(int)(Math.random() * ((100) + 1));
+	String shipstring = "";
+	while(true) {
+		shipx =  (int)(Math.random() * ((sizem) + 1));
+		shipy=  (int)(Math.random() * ((sizem) + 1));
+		if(shipx != coastGuardX && shipy != coastGuardY) {
+			shipstring = shipstring + shipx + "," + shipy+ "," +shipPassengers+",";
+			
+		break;
+		}
+	}
+		
+	int stationx= 0;
+	int stationy=1;
+	String stationstring = "";
+	while(true) {
+		stationx =  (int)(Math.random() * ((sizem-1) + 1));
+		stationy=  (int)(Math.random() * ((sizem-1) + 1));
+		
+		if(stationx != coastGuardX && stationy != coastGuardY) {
+			if(stationx != shipx && stationy != shipy) {
+				stationstring = stationstring + stationx + "," + stationy+ ",";
+			break;
+			
+		}
+			
+		}
+		
+	}
+	
+	
+	
+	
+	
+	
+	for(int x = 0; x<sizem;x++) {
+		for(int y = 0; y<sizen;y++ ) {
+			if(x == stationx && y == stationy) {
+				
+			}else
+			if(x == shipx && y == shipy) {
+				
+			}else
+			if(x == coastGuardX && y == coastGuardY) {
+				
+			}else {
+			int luckofthedraw = (int)(Math.random() * ((10) + 1));
+			if(luckofthedraw==10) {
+				stationstring = stationstring +x +","+ y+ ";";
+			}
+			if(luckofthedraw== 9) {
+				int currshipPassengers=(int)(Math.random() * ((100) + 1));
+				shipstring = shipstring +x +","+ y+ ","+ currshipPassengers + ",";
+			}
+			
+			
+			
+			
+		}
+			}
+		
+		
+	}
+		theString = theString+ stationstring +";" + shipstring+";";
+	
+	
+		
+	
+	
+	return theString;
+	
+}
 
 }
