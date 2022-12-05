@@ -63,6 +63,63 @@ public grid(String input) {
 
 }
 
+public int distance_to_target(int PlayerX, int PlayerY,int TargetX, int TargetY) {
+	int total = 0;
+	int x = PlayerX - TargetX;
+	int y = PlayerY - TargetY;
+	x = Math.abs(x);
+	y = Math.abs(y);
+	total = x+y;
+	return total;
+	
+}
+
+public int[] nearest_Human_ship(int x, int y) {
+	
+	int[] output = {0,0};
+	int min = 0;
+	for(int i = 0; i<shipslist.size();i++) {
+		
+	}
+	
+	return output;
+	
+}
+
+
+
+public boolean are_there_BlackBoxes() {
+	
+	for(int i = 0; i<shipslist.size();i++) {
+		if(shipslist.get(i).hasBlackBox) {
+			return true;
+		}
+		
+	}
+	
+	
+	return false;
+}
+
+
+
+public boolean are_there_humans() {
+	
+	for(int i = 0; i<shipslist.size();i++) {
+		if(shipslist.get(i).are_there_people_here()) {
+			return true;
+		}
+		
+	}
+	
+	
+	return false;
+}
+
+
+
+
+
 public int isThisAShip(int x,int y){
 	for(int i = 0;i<shipslist.size();i++) {
 		if(shipslist.get(i).x== x && shipslist.get(i).y==y) {
@@ -81,8 +138,7 @@ public int isThisAStation(int x,int y){
 	return -1;
 }
 
-
-
+ 
 public boolean possiblemove(operator operating,int x, int y) {
 	
 	
