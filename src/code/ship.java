@@ -5,13 +5,17 @@ public class ship {
 	int y;
 	int numberOfPassengers;
 	int BlackBoxHp = 20;
-	boolean isWreck = false;
-	boolean hasBlackBox = true;
+	boolean isWreck;
+	boolean hasBlackBox;
 	
-public ship(int xCoordinate,int yCoordinate, int initNumberOfPassengers) {
-	x= xCoordinate;
-	y= yCoordinate;
-	numberOfPassengers = initNumberOfPassengers;
+public ship(int xCoordinate,int yCoordinate, int initNumberOfPassengers, int BlackBoxHp, boolean isWreck, boolean hasBlackBox) {
+	this.x= xCoordinate;
+	this.y= yCoordinate;
+	this.numberOfPassengers = initNumberOfPassengers;
+	this.BlackBoxHp = BlackBoxHp;
+	this.isWreck = isWreck;
+	this.hasBlackBox = hasBlackBox;
+	
 }
 public int getNumberOfPassengers() {
 	return numberOfPassengers;

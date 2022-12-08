@@ -48,7 +48,7 @@ public class grid {
 			int x = Integer.parseInt(ships[i]);
 			int y = Integer.parseInt(ships[i+1]);
 			int Pass = Integer.parseInt(ships[i+2]);
-			ship thisShip = new ship(x,y,Pass);
+			ship thisShip = new ship(x,y,Pass, 20, false, true);
 			shipslist.add(thisShip);
 			
 		}
