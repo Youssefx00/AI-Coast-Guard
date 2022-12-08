@@ -27,7 +27,7 @@ public class grid {
 		M = Integer.parseInt(MandN[0]);
 		N = Integer.parseInt(MandN[1]);
 		
-	
+		
 		maxNumberofPassengers = Integer.parseInt(temp[1]);
 		
 		//initial coast guard location
@@ -192,7 +192,7 @@ public class grid {
 			
 		if(operating== operator.Retrieve){
 			
-			//get function to check the ammount of passengers on board\
+			//get function to check the amount of passengers on board\
 		
 			int stationNumber = isThisAShip(node);
 			if(stationNumber != -1) {
@@ -201,35 +201,35 @@ public class grid {
 				}
 			}
 		
-			
 		}
 		if(operating == operator.Up){
 			//if(y-1>0) {
 			//if(node.state.x-1>=0 && node.state.x-1<M) {
-			if(node.state.x-1>0) {
+			if(node.state.x-1>=0) {
 				return true;
 			}
 		}
-		if(operating== operator.Down){
+		if(operating == operator.Down){
 			//if(y+1<N) {
 			//if(node.state.x+1>0 && node.state.x+1<=M) {
 			if(node.state.x+1<M) {
 				return true;
 			}
 		}
-		if(operating== operator.Left){
-			//if(x-1>0) {
-			//if(node.state.y-1>0 && node.state.y-1<=N) {
-			if(node.state.y-1>0 ) {
-				return true;
-			}
-		}
-		if(operating== operator.Right){	
+		if(operating == operator.Right){	
 			//if(x+1<M) {
 			if(node.state.y+1<N) {
 				return true;
 			}
 		}
+		if(operating == operator.Left){
+			//if(x-1>0) {
+			//if(node.state.y-1>0 && node.state.y-1<=N) {
+			if(node.state.y-1>=0 ) {
+				return true;
+			}
+		}
+		
 			
 		return false;
 	}

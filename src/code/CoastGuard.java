@@ -47,7 +47,11 @@ public class CoastGuard extends GenericSearchProblem{
 			System.out.println("undamaged: " +currNode.state.undamagedBoxes);
 			System.out.println("retrieved: " +currNode.state.retrievedBoxes);
 			System.out.println("ships: " +currNode.state.ships.size());
+			for(int i = 0; i<currNode.state.ships.size(); i++) {
+				System.out.println("Ship: " +(i+1)+":- "+ currNode.state.ships.get(i).numberOfPassengers);
+			}
 			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			
 			if(GoalTest(currNode) == true) {
 				System.out.println("Success");
 				return currNode;
@@ -97,28 +101,8 @@ public class CoastGuard extends GenericSearchProblem{
 			catch(Exception e){
 				
 			}
-			//if(grid.possiblemove(operator.Up, node) == true ) {
-			if(grid.possiblemove(operator.Up, node) == true && parentOp != operator.Down) {
-				node newNode = createNode(grid, node, operator.Up);
-				String key = newNode.state.x + newNode.state.y +newNode.state.unrescusedPassengers +newNode.state.deaths +newNode.state.undamagedBoxes + newNode.state.retrievedBoxes +"";
-				if(!RepeatedNodes.contains(key)) {
-					nodes.addFirst(newNode);
-					RepeatedNodes.put(key, newNode);
-				}
-				
-			}
-			//if(grid.possiblemove(operator.Right, node) == true) {
-			if(grid.possiblemove(operator.Right, node) == true && parentOp != operator.Left) {
-
-				node newNode = createNode(grid, node, operator.Right);
-				String key = newNode.state.x + newNode.state.y +newNode.state.unrescusedPassengers +newNode.state.deaths +newNode.state.undamagedBoxes + newNode.state.retrievedBoxes +"";
-				if(!RepeatedNodes.contains(key)) {
-					nodes.addFirst(newNode);
-					RepeatedNodes.put(key, newNode);
-				}
-			}
-			//if(grid.possiblemove(operator.Down, node) == true ) {
-			if(grid.possiblemove(operator.Down, node) == true && parentOp != operator.Up) {
+			if(grid.possiblemove(operator.Down, node) == true ) {
+			//if(grid.possiblemove(operator.Down, node) == true && parentOp != operator.Up) {
 
 				node newNode = createNode(grid, node, operator.Down);
 				String key = newNode.state.x + newNode.state.y +newNode.state.unrescusedPassengers +newNode.state.deaths +newNode.state.undamagedBoxes + newNode.state.retrievedBoxes +"";
@@ -127,11 +111,30 @@ public class CoastGuard extends GenericSearchProblem{
 					RepeatedNodes.put(key, newNode);
 				}
 			}
-
-			//if(grid.possiblemove(operator.Left, node) == true) {
-			if(grid.possiblemove(operator.Left, node) == true && parentOp != operator.Right) {
+			if(grid.possiblemove(operator.Up, node) == true ) {
+			//if(grid.possiblemove(operator.Up, node) == true && parentOp != operator.Down) {
+				node newNode = createNode(grid, node, operator.Up);
+				String key = newNode.state.x + newNode.state.y +newNode.state.unrescusedPassengers +newNode.state.deaths +newNode.state.undamagedBoxes + newNode.state.retrievedBoxes +"";
+				if(!RepeatedNodes.contains(key)) {
+					nodes.addFirst(newNode);
+					RepeatedNodes.put(key, newNode);
+				}
+				
+			}
+			if(grid.possiblemove(operator.Left, node) == true) {
+			//if(grid.possiblemove(operator.Left, node) == true && parentOp != operator.Right) {
 
 				node newNode = createNode(grid, node, operator.Left);
+				String key = newNode.state.x + newNode.state.y +newNode.state.unrescusedPassengers +newNode.state.deaths +newNode.state.undamagedBoxes + newNode.state.retrievedBoxes +"";
+				if(!RepeatedNodes.contains(key)) {
+					nodes.addFirst(newNode);
+					RepeatedNodes.put(key, newNode);
+				}
+			}
+			if(grid.possiblemove(operator.Right, node) == true) {
+			//if(grid.possiblemove(operator.Right, node) == true && parentOp != operator.Left) {
+
+				node newNode = createNode(grid, node, operator.Right);
 				String key = newNode.state.x + newNode.state.y +newNode.state.unrescusedPassengers +newNode.state.deaths +newNode.state.undamagedBoxes + newNode.state.retrievedBoxes +"";
 				if(!RepeatedNodes.contains(key)) {
 					nodes.addFirst(newNode);
@@ -153,9 +156,7 @@ public class CoastGuard extends GenericSearchProblem{
 				nodes.addFirst(createNode(grid, node, operator.Retrieve));
 				
 			}
-			
-
-			System.out.println("expanded: "+ nodes.size() + " nodes");
+			//System.out.println("expanded: "+ nodes.size() + " nodes");
 		return nodes;
 	}
 	
@@ -172,13 +173,11 @@ public class CoastGuard extends GenericSearchProblem{
 		}
 		return false;
 	}
-	
 	@Override
 	int PathCost(node node) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
 	static int calcPassengers (ArrayList<ship> ships) {
 		int Sum = 0;
 		for(int i = 0; i< ships.size();i++) {
@@ -188,11 +187,10 @@ public class CoastGuard extends GenericSearchProblem{
 		}
 		return Sum;
 	}
-
 	static int calcBoxes (ArrayList<ship> ships) {
 		int Sum = 0;
 		for(int i = 0; i< ships.size();i++) {
-			if(ships.get(i).hasBlackBox) {
+			if(ships.get(i).hasBlackBox && ships.get(i).isWreck) {
 				Sum += 1;
 			}
 		}
@@ -292,9 +290,12 @@ public class CoastGuard extends GenericSearchProblem{
 			if(newShip.isWreck == true && newShip.hasBlackBox) {
 				newShip.BlackBoxHp -=1;
 			} else {
-				newShip.numberOfPassengers-=1;
-				if(newShip.numberOfPassengers == 0)
+				if(newShip.numberOfPassengers>0) {
+					newShip.numberOfPassengers-=1;
+				}
+				if(newShip.numberOfPassengers == 0) {
 					newShip.isWreck = true;
+				}
 			}
 			
 			
@@ -417,10 +418,19 @@ public class CoastGuard extends GenericSearchProblem{
 
 	public static void main(String[] args) {
 		
-		String grid = "5,6;50;0,1;0,4,3,3;1,1,90;";
-		//String grid = "6,6;52;2,0;2,4,4,0,5,4;2,1,19,4,2,6,5,0,8;";
-		//String grid = "5,6;50;0,1;0,4,3,3;1,1,30;";
-		System.out.println(solve(grid, "BF", false));
-		//System.out.println(solve(grid, "DF", false));
+		String grid0 = "5,6;50;0,1;0,4,3,3;1,1,90;";
+		String grid1 = "6,6;52;2,0;2,4,4,0,5,4;2,1,19,4,2,6,5,0,8;";
+		String grid2 = "7,5;40;2,3;3,6;1,1,10,4,5,90;";
+		String grid3 = "8,5;60;4,6;2,7;3,4,37,3,5,93,4,0,40;";
+		String grid4 = "5,7;63;4,2;6,2,6,3;0,0,17,0,2,73,3,0,30;";
+		String grid5 = "5,5;69;3,3;0,0,0,1,1,0;0,3,78,1,2,2,1,3,14,4,4,9;";
+		String grid6 = "7,5;86;0,0;1,3,1,5,4,2;1,1,42,2,5,99,3,5,89;";
+		String grid7= "6,7;82;1,4;2,3;1,1,58,3,0,58,4,2,72;";
+		String grid8 = "6,6;74;1,1;0,3,1,0,2,0,2,4,4,0,4,2,5,0;0,0,78,3,3,5,4,3,40;";
+		String grid9 = "7,5;100;3,4;2,6,3,5;0,0,4,0,1,8,1,4,77,1,5,1,3,2,94,4,3,46;";
+		String grid10= "10,6;59;1,7;0,0,2,2,3,0,5,3;1,3,69,3,4,80,4,7,94,4,9,14,5,2,39;";
+		
+		//System.out.println(solve(grid, "BF", false));
+		System.out.println(solve(grid1, "DF", false));
 	}
 }
