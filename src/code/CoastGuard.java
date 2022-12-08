@@ -116,6 +116,14 @@ public class CoastGuard extends GenericSearchProblem{
 		}
 		map[theNode.state.y][theNode.state.x] = map[theNode.state.y][theNode.state.x] + "|| ship " +"("+ theNode.state.carriedPassengers+")"; 
 		
+		for(int i = 0; i<map.length;i++) {
+			System.out.println("");
+			for(int j = 0; j<map[i].length;j++) {
+				System.out.print(map[i][j] +",");
+			}
+			
+		}
+		
 		
 	}
 	
