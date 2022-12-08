@@ -4,9 +4,10 @@ public class ship {
 	int x;
 	int y;
 	int numberOfPassengers;
-
 	int BlackBoxHp = 20;
+	boolean isWreck = false;
 	boolean hasBlackBox = true;
+	
 public ship(int xCoordinate,int yCoordinate, int initNumberOfPassengers) {
 	x= xCoordinate;
 	y= yCoordinate;

@@ -6,7 +6,7 @@ public class node {
 	int depth;
 	float pathCost;
 	state state;
-	
+	String Solution;
 	public node(node parentNode, operator operator, int depth, float pathCost, state state) {
 		this.parentNode = parentNode;
 		this.operator = operator;
