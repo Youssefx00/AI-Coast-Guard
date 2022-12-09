@@ -84,24 +84,8 @@ public class grid {
 		
 		return false;
 	}
-	
-	public int isThisAShip(node node){
-		for(int i = 0;i<node.state.ships.size();i++) {
-			if(node.state.ships.get(i).x == node.state.x && node.state.ships.get(i).y== node.state.y) {
-				return i;
-			}
-		}
-		return -1;
-	}
-	
-	public boolean isThisAStation(node node){
-		for(int i = 0;i<stationslist.size();i++) {
-			if(stationslist.get(i).x == node.state.x && stationslist.get(i).y == node.state.y) {
-				return true;
-			}
-		}
-		return false;
-	}
+
+
 	 
 	public boolean possiblemove(operator operating,node node) {
 		
@@ -187,5 +171,25 @@ public class grid {
 	
 		return false;
 	}
+	
+	
+	public int isThisAShip(node node){
+		for(int i = 0;i<node.state.ships.size();i++) {
+			if(node.state.ships.get(i).x == node.state.x && node.state.ships.get(i).y== node.state.y) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	public boolean isThisAStation(node node){
+		for(int i = 0;i<stationslist.size();i++) {
+			if(stationslist.get(i).x == node.state.x && stationslist.get(i).y == node.state.y) {
+				return true;
+			}
+		}
+		return false;
+	}	
+	
 
 }
