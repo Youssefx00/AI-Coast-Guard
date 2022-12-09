@@ -64,24 +64,23 @@ public class CoastGuard extends GenericSearchProblem {
 		nodes.add(initialNode);
 		while (!nodes.isEmpty()) {
 			node currNode = nodes.removeFirst();
-//			System.out.println("operator: " +currNode.operator);
-//			System.out.println("depth: " +currNode.depth);
-//			System.out.println("pathCost: " +currNode.pathCost[0] + ", " + currNode.pathCost[1]);
-//			System.out.println("x: " +currNode.state.x);
-//			System.out.println("y: " +currNode.state.y);
-//			System.out.println("unrescued: " +currNode.state.unrescusedPassengers);
-//			System.out.println("deaths: " +currNode.state.deaths);
-//			System.out.println("carried: " +currNode.state.carriedPassengers);
-//			System.out.println("undamaged: " +currNode.state.undamagedBoxes);
-//			System.out.println("retrieved: " +currNode.state.retrievedBoxes);
-//			System.out.println("ships: " +currNode.state.ships.size());
-//			for(int i = 0; i<currNode.state.ships.size(); i++) {
-//				System.out.println("Ship: " +(i+1)+":- "+ currNode.state.ships.get(i).numberOfPassengers + " , BlackBoxHP: "+ currNode.state.ships.get(i).BlackBoxHp);
-//			}
-//			
-//			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-//			
-			if (GoalTest(currNode) == true) {
+			System.out.println("operator: " +currNode.operator);
+			System.out.println("depth: " +currNode.depth);
+			System.out.println("pathCost: " +currNode.pathCost[0] + ", " + currNode.pathCost[1]);
+			System.out.println("x: " +currNode.state.x);
+			System.out.println("y: " +currNode.state.y);
+			System.out.println("unrescued: " +currNode.state.unrescusedPassengers);
+			System.out.println("deaths: " +currNode.state.deaths);
+			System.out.println("carried: " +currNode.state.carriedPassengers);
+			System.out.println("undamaged: " +currNode.state.undamagedBoxes);
+			System.out.println("retrieved: " +currNode.state.retrievedBoxes);
+			for(int i = 0; i<currNode.state.ships.size(); i++) {
+				System.out.println("Ship: " +(i+1)+":- "+ currNode.state.ships.get(i).numberOfPassengers + " , BlackBoxHP: "+ currNode.state.ships.get(i).BlackBoxHp);
+			}
+			
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			
+			if(GoalTest(currNode) == true) {
 				System.out.println("Success");
 				return currNode;
 			}
@@ -330,8 +329,10 @@ public class CoastGuard extends GenericSearchProblem {
 
 	static int calcBoxes(ArrayList<ship> ships) {
 		int Sum = 0;
-		for (int i = 0; i < ships.size(); i++) {
-			if (ships.get(i).hasBlackBox == true && ships.get(i).isWreck == true && ships.get(i).BlackBoxHp > 1) {
+		for(int i = 0; i< ships.size();i++) {
+			if(ships.get(i).hasBlackBox == true 
+					&& ships.get(i).isWreck == true 
+					&& ships.get(i).BlackBoxHp<20 ) {
 				Sum += 1;
 			}
 		}
@@ -410,6 +411,8 @@ public class CoastGuard extends GenericSearchProblem {
 		default:
 			break;
 		}
+		
+		//newNode.state.undamagedBoxes = calcBoxes(updatedShips);
 		return newNode;
 	}
 
@@ -417,17 +420,19 @@ public class CoastGuard extends GenericSearchProblem {
 	// if blackboxhp drops to 0
 	static ArrayList<ship> updateShips(grid grid, node node, operator operation) {
 		ArrayList<ship> newShipList = new ArrayList<ship>();
-		for (int i = 0; i < node.state.ships.size(); i++) {
-
-			ship newShip = new ship(node.state.ships.get(i).x, node.state.ships.get(i).y,
-					node.state.ships.get(i).numberOfPassengers, node.state.ships.get(i).BlackBoxHp,
-					node.state.ships.get(i).isWreck, node.state.ships.get(i).hasBlackBox);
-			if (newShip.x == node.state.x && newShip.y == node.state.y) {
+		for(int i = 0; i<node.state.ships.size(); i++) {
+			
+			ship newShip = new ship(node.state.ships.get(i).x, node.state.ships.get(i).y, node.state.ships.get(i).numberOfPassengers, node.state.ships.get(i).BlackBoxHp, node.state.ships.get(i).isWreck, node.state.ships.get(i).hasBlackBox); 
+			
+			
+			
+			
+			if(newShip.x == node.state.x && newShip.y == node.state.y) {
 				switch (operation) {
 				case Retrieve:
 					newShip.hasBlackBox = false;
 					newShip.isWreck = true;
-					newShip.BlackBoxHp = 0;
+					newShip.BlackBoxHp = 20;
 					break;
 				case Pickup:
 
@@ -446,11 +451,11 @@ public class CoastGuard extends GenericSearchProblem {
 					break;
 				}
 			}
-			// update
-			if (operation != operator.Pickup) {
-				if (newShip.isWreck == true && newShip.hasBlackBox == true) {
-					if (newShip.BlackBoxHp > 0) {
-						newShip.BlackBoxHp -= 1;
+			//update
+			if(operation != operator.Pickup) {
+				if(newShip.isWreck == true && newShip.hasBlackBox == true) {
+					if(newShip.BlackBoxHp<20) {
+						newShip.BlackBoxHp +=1;
 					}
 
 				} else if (newShip.isWreck == false && newShip.hasBlackBox == true) {
@@ -458,11 +463,12 @@ public class CoastGuard extends GenericSearchProblem {
 						newShip.numberOfPassengers -= 1;
 					}
 				}
-
-				if (newShip.BlackBoxHp == 0) {
+				
+				if(newShip.BlackBoxHp >= 20) {
 					newShip.hasBlackBox = false;
+					newShip.isWreck = true;
 				}
-				if (newShip.numberOfPassengers == 0) {
+				if(newShip.numberOfPassengers <= 0) {
 					newShip.isWreck = true;
 				}
 			}
@@ -470,13 +476,12 @@ public class CoastGuard extends GenericSearchProblem {
 		}
 		return newShipList;
 	}
-
-	static void updateTime(grid grid, node node, operator operation) {
-
-		for (int i = 0; i < node.state.ships.size(); i++) {
-			if (node.state.ships.get(i).isWreck == true && node.state.ships.get(i).hasBlackBox == true) {
-				if (node.state.ships.get(i).BlackBoxHp > 0) {
-					node.state.ships.get(i).BlackBoxHp -= 1;
+	static void updateTime(grid grid,node node, operator operation){
+		
+		for(int i = 0; i<node.state.ships.size(); i++) {
+			if(node.state.ships.get(i).isWreck == true && node.state.ships.get(i).hasBlackBox == true) {
+				if(node.state.ships.get(i).BlackBoxHp<20) {
+					node.state.ships.get(i).BlackBoxHp +=1;
 				}
 
 			} else if (node.state.ships.get(i).isWreck == false && node.state.ships.get(i).hasBlackBox == true) {
@@ -485,10 +490,16 @@ public class CoastGuard extends GenericSearchProblem {
 				}
 
 			}
-			if (node.state.ships.get(i).BlackBoxHp == 0) {
+//			else {
+//				System.out.println("Wreck: " + node.state.ships.get(i).isWreck);
+//				System.out.println("Box: " + node.state.ships.get(i).hasBlackBox);
+//				System.out.println("failllllll");
+//			}
+			if(node.state.ships.get(i).BlackBoxHp >= 20) {
 				node.state.ships.get(i).hasBlackBox = false;
+				node.state.ships.get(i).isWreck = true;
 			}
-			if (node.state.ships.get(i).numberOfPassengers == 0) {
+			if(node.state.ships.get(i).numberOfPassengers <= 0) {
 				node.state.ships.get(i).isWreck = true;
 			}
 
@@ -623,11 +634,12 @@ public class CoastGuard extends GenericSearchProblem {
 		String grid7 = "6,7;82;1,4;2,3;1,1,58,3,0,58,4,2,72;";
 		String grid8 = "6,6;74;1,1;0,3,1,0,2,0,2,4,4,0,4,2,5,0;0,0,78,3,3,5,4,3,40;";
 		String grid9 = "7,5;100;3,4;2,6,3,5;0,0,4,0,1,8,1,4,77,1,5,1,3,2,94,4,3,46;";
-		String grid10 = "10,6;59;1,7;0,0,2,2,3,0,5,3;1,3,69,3,4,80,4,7,94,4,9,14,5,2,39;";
-
-		System.out.println(solve(grid5, "BF", false));
-		System.out.println(solve(grid5, "UC", false));
-
+		String grid10= "10,6;59;1,7;0,0,2,2,3,0,5,3;1,3,69,3,4,80,4,7,94,4,9,14,5,2,39;";
+		
+		System.out.println(solve(grid7, "BF", false));
+		//System.out.println(solve(grid7, "DF", false));
+		//System.out.println(solve(grid7, "UC", false));
+		
 //		grid FirstGrid = new grid(grid1);
 //		state initialState = new state(FirstGrid.coastGuardX, FirstGrid.coastGuardY, calcPassengers(FirstGrid.shipslist), 0, 0, 0, 0, FirstGrid.shipslist);
 //		int[] pathCost = {0,0};
