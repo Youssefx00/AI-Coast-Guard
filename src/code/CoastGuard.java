@@ -1,10 +1,12 @@
 package code;
 
+import java.rmi.server.Operation;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
+import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class CoastGuard extends GenericSearchProblem {
@@ -36,12 +38,17 @@ public class CoastGuard extends GenericSearchProblem {
 		// get goal node
 		if (strategy == "ID") {
 			while (goalNode == null) {
+				RepeatedStates = new HashMap<String, state>();
 				goalNode = General_Search_Procedure(FirstGrid, initialNode, "ID");
 				iterativeDepth += 1;
 			}
 		} else {
-
-			goalNode = General_Search_Procedure(FirstGrid, initialNode, strategy);
+			if(strategy == "GR1" || strategy == "UC") {
+			goalNode = General_Search_ProcedureGR(FirstGrid, initialNode, strategy);
+			}
+			else {
+				goalNode = General_Search_Procedure(FirstGrid, initialNode, strategy);
+			}
 		}
 
 		// create String
@@ -52,34 +59,42 @@ public class CoastGuard extends GenericSearchProblem {
 		Final_Solution += goalNode.state.retrievedBoxes + ";";
 		Final_Solution += tempArr.length + "";
 		// System.out.println(Final_Solution);
+		
+		if(visualize == true) {
+			Stack<node> reversedNodes = new Stack<node>();
+			node currNode = goalNode;
+			while(currNode!=null) {
+				reversedNodes.push(currNode);
+				currNode = currNode.parentNode;
+			}
+			Stack<node> nodes = new Stack<node>();
+			while(!nodes.isEmpty()) {
+				Visualise(nodes.pop());
+			}
+		}
 		return Final_Solution;
 	}
 
 	public static node General_Search_Procedure(grid grid, node initialNode, String strat) {
-		// Queue<node> nodes = new LinkedList<>();
-//			gridM = grid.M;
-//			gridN = grid.N;
-		// Hashtable<String, node> RepeatedNodes = new Hashtable<String, node>();
 		Deque<node> nodes = new LinkedList<>();
 		nodes.add(initialNode);
 		while (!nodes.isEmpty()) {
 			node currNode = nodes.removeFirst();
-			System.out.println("operator: " +currNode.operator);
-			System.out.println("depth: " +currNode.depth);
-			System.out.println("pathCost: " +currNode.pathCost[0] + ", " + currNode.pathCost[1]);
-			System.out.println("x: " +currNode.state.x);
-			System.out.println("y: " +currNode.state.y);
-			System.out.println("unrescued: " +currNode.state.unrescusedPassengers);
-			System.out.println("deaths: " +currNode.state.deaths);
-			System.out.println("carried: " +currNode.state.carriedPassengers);
-			System.out.println("undamaged: " +currNode.state.undamagedBoxes);
-			System.out.println("retrieved: " +currNode.state.retrievedBoxes);
-			for(int i = 0; i<currNode.state.ships.size(); i++) {
-				System.out.println("Ship: " +(i+1)+":- "+ currNode.state.ships.get(i).numberOfPassengers + " , BlackBoxHP: "+ currNode.state.ships.get(i).BlackBoxHp);
-			}
-			
-			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-			
+//			System.out.println("operator: " +currNode.operator);
+//			System.out.println("depth: " +currNode.depth);
+//			System.out.println("pathCost: " +currNode.pathCost[0] + ", " + currNode.pathCost[1]);
+//			System.out.println("x: " +currNode.state.x);
+//			System.out.println("y: " +currNode.state.y);
+//			System.out.println("unrescued: " +currNode.state.unrescusedPassengers);
+//			System.out.println("deaths: " +currNode.state.deaths);
+//			System.out.println("carried: " +currNode.state.carriedPassengers);
+//			System.out.println("undamaged: " +currNode.state.undamagedBoxes);
+//			System.out.println("retrieved: " +currNode.state.retrievedBoxes);
+//			for(int i = 0; i<currNode.state.ships.size(); i++) {
+//				System.out.println("Ship: " +(i+1)+":- "+ currNode.state.ships.get(i).numberOfPassengers + " , BlackBoxHP: "+ currNode.state.ships.get(i).BlackBoxHp);
+//			}
+//			
+//			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");		
 			if(GoalTest(currNode) == true) {
 				System.out.println("Success");
 				return currNode;
@@ -94,7 +109,83 @@ public class CoastGuard extends GenericSearchProblem {
 		return null;
 
 	}
+	public static node General_Search_ProcedureGR(grid grid, node initialNode, String strat) {
+		//Deque<node> nodes = new LinkedList<>();
+		PriorityQueue<node> nodes = new PriorityQueue<node>(new HR1comparable());
+		nodes.add(initialNode);
+		while (!nodes.isEmpty()) {
+			node currNode = nodes.remove();
+//			System.out.println("operator: " +currNode.operator);
+//			System.out.println("depth: " +currNode.depth);
+//			System.out.println("pathCost: " +currNode.pathCost[0] + ", " + currNode.pathCost[1]);
+//			System.out.println("x: " +currNode.state.x);
+//			System.out.println("y: " +currNode.state.y);
+//			System.out.println("unrescued: " +currNode.state.unrescusedPassengers);
+//			System.out.println("deaths: " +currNode.state.deaths);
+//			System.out.println("carried: " +currNode.state.carriedPassengers);
+//			System.out.println("undamaged: " +currNode.state.undamagedBoxes);
+//			System.out.println("retrieved: " +currNode.state.retrievedBoxes);
+//			for(int i = 0; i<currNode.state.ships.size(); i++) {
+//				System.out.println("Ship: " +(i+1)+":- "+ currNode.state.ships.get(i).numberOfPassengers + " , BlackBoxHP: "+ currNode.state.ships.get(i).BlackBoxHp);
+//			}
+//			
+//			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");		
+			if(GoalTest(currNode) == true) {
+				System.out.println("Success");
+				return currNode;
+			}
+			Deque<node> newNodes = new LinkedList<>();
+			newNodes = Expand(grid, currNode, strat);
+			nodes = QingFuncGR(nodes, newNodes, strat);
+			// System.out.println("GS expanded: " + nodes.size());
 
+		}
+		System.out.println("Failure");
+		return null;
+
+	}
+	static PriorityQueue<node> QingFuncGR(PriorityQueue<node> nodes, Deque<node> newNodes, String strat) {
+		// Deque<node> finalNodes = nodes;
+		PriorityQueue<node> finalNodes = new PriorityQueue<node>(new HR1comparable());
+		finalNodes.addAll(newNodes);
+		switch (strat) {
+		case "UC":
+			PriorityQueue<node> pq = new PriorityQueue<node>(new UCScomparable());
+			pq.addAll(nodes);
+			for (int i = 0; i < newNodes.size(); i++) {
+				pq.add(newNodes.removeFirst());
+			}
+			finalNodes.addAll(pq);
+			break;
+		case "GR1":
+
+			PriorityQueue<node> pq1 = new PriorityQueue<node>(new HR1comparable());
+			for (int i = 0; i < newNodes.size(); i++) {
+				pq1.add(newNodes.removeFirst());
+			}
+			finalNodes.addAll(pq1);
+			break;
+		case "GR2":
+			for (int i = 0; i < newNodes.size(); i++) {
+				finalNodes.add(newNodes.removeFirst());
+			}
+			break;
+		case "AS1":
+			for (int i = 0; i < newNodes.size(); i++) {
+				finalNodes.add(newNodes.removeFirst());
+			}
+			break;
+		case "AS2":
+			for (int i = 0; i < newNodes.size(); i++) {
+				finalNodes.add(newNodes.removeFirst());
+			}
+			break;
+		default:
+			break;
+		}
+
+		return finalNodes;
+	}
 	static boolean isFull(node node) {
 		boolean bool = false;
 		if (node.state.carriedPassengers >= maxPassengers) {
@@ -106,38 +197,49 @@ public class CoastGuard extends GenericSearchProblem {
 	static Deque<node> QingFunc(Deque<node> nodes, Deque<node> newNodes, String strat) {
 		// Deque<node> finalNodes = nodes;
 		Deque<node> finalNodes = new LinkedList<>();
-		finalNodes.addAll(nodes);
+		
 		switch (strat) {
 		case "DF":
+			finalNodes.addAll(nodes);
 			for (int i = 0; i < newNodes.size(); i++) {
 				finalNodes.addFirst(newNodes.removeFirst());
 			}
 			break;
 		case "BF":
+			finalNodes.addAll(nodes);
 			for (int i = 0; i < newNodes.size(); i++) {
 				finalNodes.addLast(newNodes.removeFirst());
 			}
 			break;
 		case "ID":
-
+			finalNodes.addAll(nodes);
 			for (int i = 0; i < newNodes.size(); i++) {
 				node tempNode = newNodes.removeFirst();
-				if (tempNode.depth < iterativeDepth) {
+				if (tempNode.depth <= iterativeDepth) {
 					finalNodes.addFirst(tempNode);
 				}
 			}
 			break;
 		case "UC":
-
-			PriorityQueue<node> pq = new PriorityQueue<node>();
+//			PriorityQueue<node> oldNodesUC = new PriorityQueue<node>(new UCScomparable());
+//			for (int i = 0; i < nodes.size(); i++) {
+//				oldNodesUC.add(nodes.removeFirst());
+//			}
+			PriorityQueue<node> pq = new PriorityQueue<node>(new UCScomparable());
+			pq.addAll(nodes);
 			for (int i = 0; i < newNodes.size(); i++) {
 				pq.add(newNodes.removeFirst());
 			}
 			finalNodes.addAll(pq);
 			break;
 		case "GR1":
-
-			PriorityQueue<node> pq1 = new PriorityQueue<node>();
+			
+//			PriorityQueue<node> oldNodesGR1 = new PriorityQueue<node>(new HR1comparable());
+//			for (int i = 0; i < nodes.size(); i++) {
+//				oldNodesGR1.add(nodes.removeFirst());
+//			}
+			PriorityQueue<node> pq1 = new PriorityQueue<node>(new HR1comparable());
+			pq1.addAll(nodes);
 			for (int i = 0; i < newNodes.size(); i++) {
 				pq1.add(newNodes.removeFirst());
 			}
@@ -235,7 +337,7 @@ public class CoastGuard extends GenericSearchProblem {
 					+ Integer.toString(newNode.state.unrescusedPassengers) + Integer.toString(newNode.state.deaths)
 					+ Integer.toString(newNode.state.undamagedBoxes) + Integer.toString(newNode.state.retrievedBoxes)
 					+ Shiphealths(newNode.state.ships) + "";
-			// if(!RepeatedNodes.contains(key)|| strat == "ID") {+
+			//if(!RepeatedStates.containsKey(key)|| strat == "GR1") {
 			if (!RepeatedStates.containsKey(key)) {
 				nodes.addFirst(newNode);
 				RepeatedStates.put(key, newNode.state);
@@ -250,7 +352,7 @@ public class CoastGuard extends GenericSearchProblem {
 					+ Integer.toString(newNode.state.unrescusedPassengers) + Integer.toString(newNode.state.deaths)
 					+ Integer.toString(newNode.state.undamagedBoxes) + Integer.toString(newNode.state.retrievedBoxes)
 					+ Shiphealths(newNode.state.ships) + "";
-			// if(!RepeatedNodes.contains(key)|| strat == "ID") {
+			//if(!RepeatedStates.containsKey(key)|| strat == "GR1") {
 			if (!RepeatedStates.containsKey(key)) {
 				nodes.addFirst(newNode);
 				RepeatedStates.put(key, newNode.state);
@@ -266,7 +368,7 @@ public class CoastGuard extends GenericSearchProblem {
 					+ Integer.toString(newNode.state.unrescusedPassengers) + Integer.toString(newNode.state.deaths)
 					+ Integer.toString(newNode.state.undamagedBoxes) + Integer.toString(newNode.state.retrievedBoxes)
 					+ Shiphealths(newNode.state.ships) + "";
-			// if(!RepeatedNodes.contains(key)|| strat == "ID") {
+			// if(!RepeatedStates.containsKey(key)|| strat == "GR1") {
 			if (!RepeatedStates.containsKey(key)) {
 				nodes.addFirst(newNode);
 				RepeatedStates.put(key, newNode.state);
@@ -281,7 +383,7 @@ public class CoastGuard extends GenericSearchProblem {
 					+ Integer.toString(newNode.state.unrescusedPassengers) + Integer.toString(newNode.state.deaths)
 					+ Integer.toString(newNode.state.undamagedBoxes) + Integer.toString(newNode.state.retrievedBoxes)
 					+ Shiphealths(newNode.state.ships) + "";
-			// if(!RepeatedNodes.contains(key) || strat == "ID") {
+			//if(!RepeatedStates.containsKey(key)|| strat == "GR1") {
 			if (!RepeatedStates.containsKey(key)) {
 				nodes.addFirst(newNode);
 				RepeatedStates.put(key, newNode.state);
@@ -454,6 +556,7 @@ public class CoastGuard extends GenericSearchProblem {
 			//update
 			if(operation != operator.Pickup) {
 				if(newShip.isWreck == true && newShip.hasBlackBox == true) {
+					
 					if(newShip.BlackBoxHp<20) {
 						newShip.BlackBoxHp +=1;
 					}
@@ -464,7 +567,7 @@ public class CoastGuard extends GenericSearchProblem {
 					}
 				}
 				
-				if(newShip.BlackBoxHp >= 20) {
+				if(newShip.BlackBoxHp == 20) {
 					newShip.hasBlackBox = false;
 					newShip.isWreck = true;
 				}
@@ -495,7 +598,7 @@ public class CoastGuard extends GenericSearchProblem {
 //				System.out.println("Box: " + node.state.ships.get(i).hasBlackBox);
 //				System.out.println("failllllll");
 //			}
-			if(node.state.ships.get(i).BlackBoxHp >= 20) {
+			if(node.state.ships.get(i).BlackBoxHp == 20) {
 				node.state.ships.get(i).hasBlackBox = false;
 				node.state.ships.get(i).isWreck = true;
 			}
@@ -636,9 +739,12 @@ public class CoastGuard extends GenericSearchProblem {
 		String grid9 = "7,5;100;3,4;2,6,3,5;0,0,4,0,1,8,1,4,77,1,5,1,3,2,94,4,3,46;";
 		String grid10= "10,6;59;1,7;0,0,2,2,3,0,5,3;1,3,69,3,4,80,4,7,94,4,9,14,5,2,39;";
 		
-		System.out.println(solve(grid7, "BF", false));
-		//System.out.println(solve(grid7, "DF", false));
-		//System.out.println(solve(grid7, "UC", false));
+		System.out.println(solve(grid0, "BF", false));
+		System.out.println(solve(grid0, "DF", false));
+		System.out.println(solve(grid0, "UC", false));
+		//System.out.println(solve(grid0, "ID", false));
+		System.out.println(solve(grid0, "GR1", true));
+		
 		
 //		grid FirstGrid = new grid(grid1);
 //		state initialState = new state(FirstGrid.coastGuardX, FirstGrid.coastGuardY, calcPassengers(FirstGrid.shipslist), 0, 0, 0, 0, FirstGrid.shipslist);
@@ -647,9 +753,9 @@ public class CoastGuard extends GenericSearchProblem {
 //		Visualise(General_Search_Procedure(FirstGrid, initialNode, "UC"));
 	}
 
-	public int priorityHumanDecider(node thisnode) {
+	public static int priorityHumanDecider(node thisnode) {
 
-		if (are_there_humans(thisnode)) {
+		if (!are_there_humans(thisnode)) {
 
 			if (!isFull(thisnode)) {
 				int[] nearesthumanship = nearest_Human_ship(thisnode.state.x, thisnode.state.y, thisnode);
@@ -685,7 +791,7 @@ public class CoastGuard extends GenericSearchProblem {
 		return false;
 	}
 
-	public boolean are_there_humans(node thisnode) {
+	public static boolean are_there_humans(node thisnode) {
 
 		for (int i = 0; i < thisnode.state.ships.size(); i++) {
 			if (thisnode.state.ships.get(i).are_there_people_here()) {
@@ -721,7 +827,7 @@ public class CoastGuard extends GenericSearchProblem {
 		return null;
 	}
 
-	public int distance_to_target(int PlayerX, int PlayerY, int TargetX, int TargetY) {
+	public static int distance_to_target(int PlayerX, int PlayerY, int TargetX, int TargetY) {
 		int total = 0;
 		int x = PlayerX - TargetX;
 		int y = PlayerY - TargetY;
@@ -732,7 +838,7 @@ public class CoastGuard extends GenericSearchProblem {
 
 	}
 
-	public int[] nearest_Human_ship(int x, int y, node thisnode) {
+	public static int[] nearest_Human_ship(int x, int y, node thisnode) {
 
 		int[] shipLocation = { -1, -1 };
 		int min = 225;
@@ -752,7 +858,7 @@ public class CoastGuard extends GenericSearchProblem {
 
 	}
 
-	public int[] nearest_station(int x, int y, node thisnode) {
+	public static int[] nearest_station(int x, int y, node thisnode) {
 
 		int[] stationLocation = { -1, -1 };
 		int min = 225;

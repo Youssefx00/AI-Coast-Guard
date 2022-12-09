@@ -1,6 +1,6 @@
 package code;
-
-public class node implements Comparable{
+import java.util.*;
+public class node{
 	node parentNode;
 	operator operator;
 	int depth;
@@ -14,21 +14,55 @@ public class node implements Comparable{
 		this.pathCost = pathCost;
 		this.state =  state;
 	}
+	
+	
+}
+class UCScomparable implements Comparator<node>{
 	@Override
-	public int compareTo(Object o) {
-		node otherNode = (node) o;
+	public int compare(node node1, node node2) {
 		
-		if(this.pathCost[0] > otherNode.pathCost[0] || this.pathCost[1] > otherNode.pathCost[0]) {
-			
-			return 1;
-		} else if(this.pathCost[0] == otherNode.pathCost[0] && this.pathCost[1] == otherNode.pathCost[0]) {
+		if(node1.pathCost[0] > node2.pathCost[0] || node1.pathCost[1] > node2.pathCost[1]) {
+			return -1;
+		} else if(node1.pathCost[0] == node2.pathCost[0] && node1.pathCost[1] == node2.pathCost[1]) {
 			return 0;
 		}
-		else if (this.pathCost[0] < otherNode.pathCost[0] || this.pathCost[1] < otherNode.pathCost[0]){
+		else if (node1.pathCost[0] < node2.pathCost[0] || node1.pathCost[1] < node2.pathCost[1]){
+			return 1;
+		}
+		return 0;
+//		if(node1.pathCost[0] > node2.pathCost[0] ) {
+//			return 1;
+//		} else if(node1.pathCost[0] > node2.pathCost[0]){
+//			
+//		}
+//			else if(node1.pathCost[0] == node2.pathCost[0] && node1.pathCost[1] == node2.pathCost[0]) {
+//		}
+//			return 0;
+//		}
+//		else if (node1.pathCost[0] < node2.pathCost[0] && node1.pathCost[1] < node2.pathCost[0]){
+//			return -1;
+//		}
+//		return 0;
+		
+	}
+	
+}
+class HR1comparable implements Comparator<node>{
+	@Override
+	public int compare(node node1, node node2) {
+		
+		//System.out.println("Node 1:" + CoastGuard.priorityHumanDecider(node1));
+		//System.out.println("Node 2:" + CoastGuard.priorityHumanDecider(node2));
+		if(CoastGuard.priorityHumanDecider(node1) > CoastGuard.priorityHumanDecider(node2)) {
+			
 			return -1;
+		} else if(CoastGuard.priorityHumanDecider(node1) == CoastGuard.priorityHumanDecider(node2) ) {
+			return 0;
+		}
+		else if (CoastGuard.priorityHumanDecider(node1) < CoastGuard.priorityHumanDecider(node2)){
+			return 1;
 		}
 		return 0;
 	}
-	
 	
 }
