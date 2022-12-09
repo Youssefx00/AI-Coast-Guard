@@ -13,9 +13,10 @@ public class state {
 	//Boxes
 	int undamagedBoxes;
 	int retrievedBoxes;
+	int lostBoxes;
 	//currentShips
 	ArrayList<ship> ships = new ArrayList<ship>();
-	public state(int x, int y, int unrescusedPassengers, int deaths, int carriedPassengers, int undamagedBoxes, int retrievedBoxes, ArrayList<ship> ships) {
+	public state(int x, int y, int unrescusedPassengers, int deaths, int carriedPassengers, int undamagedBoxes, int retrievedBoxes, int lostBoxes, ArrayList<ship> ships) {
 		this.x = x;
 		this.y = y;
 		this.unrescusedPassengers = unrescusedPassengers;
@@ -23,6 +24,7 @@ public class state {
 		this.carriedPassengers = carriedPassengers;
 		this.undamagedBoxes = undamagedBoxes;
 		this.retrievedBoxes = retrievedBoxes;
+		this.lostBoxes = lostBoxes;
 		this.ships = ships;
 	}
 }

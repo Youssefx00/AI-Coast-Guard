@@ -30,7 +30,7 @@ public class CoastGuard extends GenericSearchProblem {
 		iterativeDepth = 1;
 		// create initial node
 		state initialState = new state(FirstGrid.coastGuardX, FirstGrid.coastGuardY,
-				calcPassengers(FirstGrid.shipslist), 0, 0, 0, 0, FirstGrid.shipslist);
+				calcPassengers(FirstGrid.shipslist), 0, 0, 0, 0, 0,FirstGrid.shipslist);
 
 		int[] pathCost = { 0, 0 };
 		node initialNode = new node(null, null, 0, pathCost, initialState);
@@ -43,8 +43,8 @@ public class CoastGuard extends GenericSearchProblem {
 				iterativeDepth += 1;
 			}
 		} else {
-			if(strategy == "GR1" || strategy == "UC") {
-			goalNode = General_Search_ProcedureGR(FirstGrid, initialNode, strategy);
+			if(strategy == "GR1" || strategy == "UC" || strategy == "GR2" || strategy == "AS1" || strategy == "AS2") {
+			goalNode = General_Search_ProcedureHR(FirstGrid, initialNode, strategy);
 			}
 			else {
 				goalNode = General_Search_Procedure(FirstGrid, initialNode, strategy);
@@ -109,9 +109,8 @@ public class CoastGuard extends GenericSearchProblem {
 		return null;
 
 	}
-	public static node General_Search_ProcedureGR(grid grid, node initialNode, String strat) {
-		//Deque<node> nodes = new LinkedList<>();
-		PriorityQueue<node> nodes = new PriorityQueue<node>(new HR1comparable());
+	public static node General_Search_ProcedureHR(grid grid, node initialNode, String strat) {
+		PriorityQueue<node> nodes = new PriorityQueue<node>(new AS1comparable());
 		nodes.add(initialNode);
 		while (!nodes.isEmpty()) {
 			node currNode = nodes.remove();
@@ -136,7 +135,7 @@ public class CoastGuard extends GenericSearchProblem {
 			}
 			Deque<node> newNodes = new LinkedList<>();
 			newNodes = Expand(grid, currNode, strat);
-			nodes = QingFuncGR(nodes, newNodes, strat);
+			nodes = QingFuncHR(nodes, newNodes, strat);
 			// System.out.println("GS expanded: " + nodes.size());
 
 		}
@@ -144,12 +143,14 @@ public class CoastGuard extends GenericSearchProblem {
 		return null;
 
 	}
-	static PriorityQueue<node> QingFuncGR(PriorityQueue<node> nodes, Deque<node> newNodes, String strat) {
-		// Deque<node> finalNodes = nodes;
-		PriorityQueue<node> finalNodes = new PriorityQueue<node>(new HR1comparable());
-		finalNodes.addAll(newNodes);
+	static PriorityQueue<node> QingFuncHR(PriorityQueue<node> nodes, Deque<node> newNodes, String strat) {
+		PriorityQueue<node> finalNodes= new PriorityQueue<node>();
+		
+		
 		switch (strat) {
 		case "UC":
+			finalNodes = new PriorityQueue<node>(new UCScomparable());
+			finalNodes.addAll(newNodes);
 			PriorityQueue<node> pq = new PriorityQueue<node>(new UCScomparable());
 			pq.addAll(nodes);
 			for (int i = 0; i < newNodes.size(); i++) {
@@ -158,27 +159,40 @@ public class CoastGuard extends GenericSearchProblem {
 			finalNodes.addAll(pq);
 			break;
 		case "GR1":
-
-			PriorityQueue<node> pq1 = new PriorityQueue<node>(new HR1comparable());
+			finalNodes = new PriorityQueue<node>(new GR1comparable());
+			finalNodes.addAll(newNodes);
+			PriorityQueue<node> pq1 = new PriorityQueue<node>(new GR1comparable());
 			for (int i = 0; i < newNodes.size(); i++) {
 				pq1.add(newNodes.removeFirst());
 			}
 			finalNodes.addAll(pq1);
 			break;
 		case "GR2":
+			finalNodes = new PriorityQueue<node>(new GR2comparable());
+			finalNodes.addAll(newNodes);
+			PriorityQueue<node> pq2 = new PriorityQueue<node>(new GR2comparable());
 			for (int i = 0; i < newNodes.size(); i++) {
-				finalNodes.add(newNodes.removeFirst());
+				pq2.add(newNodes.removeFirst());
 			}
+			finalNodes.addAll(pq2);
 			break;
 		case "AS1":
+			finalNodes = new PriorityQueue<node>(new AS1comparable());
+			finalNodes.addAll(newNodes);
+			PriorityQueue<node> pq3 = new PriorityQueue<node>(new AS1comparable());
 			for (int i = 0; i < newNodes.size(); i++) {
-				finalNodes.add(newNodes.removeFirst());
+				pq3.add(newNodes.removeFirst());
 			}
+			finalNodes.addAll(pq3);
 			break;
 		case "AS2":
+			finalNodes = new PriorityQueue<node>(new AS2comparable());
+			finalNodes.addAll(newNodes);
+			PriorityQueue<node> pq4 = new PriorityQueue<node>(new AS2comparable());
 			for (int i = 0; i < newNodes.size(); i++) {
-				finalNodes.add(newNodes.removeFirst());
+				pq4.add(newNodes.removeFirst());
 			}
+			finalNodes.addAll(pq4);
 			break;
 		default:
 			break;
@@ -220,46 +234,46 @@ public class CoastGuard extends GenericSearchProblem {
 				}
 			}
 			break;
-		case "UC":
-//			PriorityQueue<node> oldNodesUC = new PriorityQueue<node>(new UCScomparable());
-//			for (int i = 0; i < nodes.size(); i++) {
-//				oldNodesUC.add(nodes.removeFirst());
+//		case "UC":
+////			PriorityQueue<node> oldNodesUC = new PriorityQueue<node>(new UCScomparable());
+////			for (int i = 0; i < nodes.size(); i++) {
+////				oldNodesUC.add(nodes.removeFirst());
+////			}
+//			PriorityQueue<node> pq = new PriorityQueue<node>(new UCScomparable());
+//			pq.addAll(nodes);
+//			for (int i = 0; i < newNodes.size(); i++) {
+//				pq.add(newNodes.removeFirst());
 //			}
-			PriorityQueue<node> pq = new PriorityQueue<node>(new UCScomparable());
-			pq.addAll(nodes);
-			for (int i = 0; i < newNodes.size(); i++) {
-				pq.add(newNodes.removeFirst());
-			}
-			finalNodes.addAll(pq);
-			break;
-		case "GR1":
-			
-//			PriorityQueue<node> oldNodesGR1 = new PriorityQueue<node>(new HR1comparable());
-//			for (int i = 0; i < nodes.size(); i++) {
-//				oldNodesGR1.add(nodes.removeFirst());
+//			finalNodes.addAll(pq);
+//			break;
+//		case "GR1":
+//			
+////			PriorityQueue<node> oldNodesGR1 = new PriorityQueue<node>(new HR1comparable());
+////			for (int i = 0; i < nodes.size(); i++) {
+////				oldNodesGR1.add(nodes.removeFirst());
+////			}
+//			PriorityQueue<node> pq1 = new PriorityQueue<node>(new HR1comparable());
+//			pq1.addAll(nodes);
+//			for (int i = 0; i < newNodes.size(); i++) {
+//				pq1.add(newNodes.removeFirst());
 //			}
-			PriorityQueue<node> pq1 = new PriorityQueue<node>(new HR1comparable());
-			pq1.addAll(nodes);
-			for (int i = 0; i < newNodes.size(); i++) {
-				pq1.add(newNodes.removeFirst());
-			}
-			finalNodes.addAll(pq1);
-			break;
-		case "GR2":
-			for (int i = 0; i < newNodes.size(); i++) {
-				finalNodes.addLast(newNodes.removeFirst());
-			}
-			break;
-		case "AS1":
-			for (int i = 0; i < newNodes.size(); i++) {
-				finalNodes.addLast(newNodes.removeFirst());
-			}
-			break;
-		case "AS2":
-			for (int i = 0; i < newNodes.size(); i++) {
-				finalNodes.addLast(newNodes.removeFirst());
-			}
-			break;
+//			finalNodes.addAll(pq1);
+//			break;
+//		case "GR2":
+//			for (int i = 0; i < newNodes.size(); i++) {
+//				finalNodes.addLast(newNodes.removeFirst());
+//			}
+//			break;
+//		case "AS1":
+//			for (int i = 0; i < newNodes.size(); i++) {
+//				finalNodes.addLast(newNodes.removeFirst());
+//			}
+//			break;
+//		case "AS2":
+//			for (int i = 0; i < newNodes.size(); i++) {
+//				finalNodes.addLast(newNodes.removeFirst());
+//			}
+//			break;
 		default:
 			break;
 		}
@@ -415,7 +429,8 @@ public class CoastGuard extends GenericSearchProblem {
 	}
 
 	static int[] pathCost(state state) {
-		int[] pathCost = { state.deaths, state.retrievedBoxes };
+		//int LostBoxes = state.undamagedBoxes - state.retrievedBoxes;
+		int[] pathCost = {state.deaths, state.lostBoxes };
 		return pathCost;
 	}
 
@@ -433,8 +448,16 @@ public class CoastGuard extends GenericSearchProblem {
 		int Sum = 0;
 		for(int i = 0; i< ships.size();i++) {
 			if(ships.get(i).hasBlackBox == true 
-					&& ships.get(i).isWreck == true 
 					&& ships.get(i).BlackBoxHp<20 ) {
+				Sum += 1;
+			}
+		}
+		return Sum;
+	}
+	static int calcLostBoxes(ArrayList<ship> ships) {
+		int Sum = 0;
+		for(int i = 0; i< ships.size();i++) {
+			if(ships.get(i).hasBlackBox == false ) {
 				Sum += 1;
 			}
 		}
@@ -453,60 +476,62 @@ public class CoastGuard extends GenericSearchProblem {
 	}
 
 	static node createNode(grid grid, node node, operator operation) {
-		// int PassDecrements = calcPassDecrements(node);
+		 
 		// int BoxDecrements = calcBoxDecrements(node);
 		ArrayList<ship> updatedShips = updateShips(grid, node, operation);
 		state newState = null;
 		node newNode = null;
 		int newPassengers = calcPassengers(updatedShips);
-		int deaths = calcPassengers(grid.shipslist) - newPassengers;
+		int PassDecrements = calcPassDecrements(node);
+		//int deaths = calcPassengers(grid.shipslist) - newPassengers;
+		int deaths = node.state.deaths + PassDecrements;
 		int x = node.state.x;
 		int y = node.state.y;
 
 		switch (operation) {
 		case Up:
 			newState = new state(x - 1, y, newPassengers, deaths, node.state.carriedPassengers, calcBoxes(updatedShips),
-					node.state.retrievedBoxes, updatedShips);
+					node.state.retrievedBoxes,calcLostBoxes(updatedShips), updatedShips);
 			newNode = new node(node, operator.Up, node.depth + 1, pathCost(newState), newState);
 			newNode.Solution = node.Solution + "up,";
 			break;
 		case Down:
 			newState = new state(x + 1, y, newPassengers, deaths, node.state.carriedPassengers, calcBoxes(updatedShips),
-					node.state.retrievedBoxes, updatedShips);
+					node.state.retrievedBoxes,calcLostBoxes(updatedShips), updatedShips);
 			newNode = new node(node, operator.Down, node.depth + 1, pathCost(newState), newState);
 			newNode.Solution = node.Solution + "down,";
 			break;
 		case Left:
 			newState = new state(x, y - 1, newPassengers, deaths, node.state.carriedPassengers, calcBoxes(updatedShips),
-					node.state.retrievedBoxes, updatedShips);
+					node.state.retrievedBoxes, calcLostBoxes(updatedShips),updatedShips);
 			newNode = new node(node, operator.Left, node.depth + 1, pathCost(newState), newState);
 			newNode.Solution = node.Solution + "left,";
 			break;
 		case Right:
 			newState = new state(x, y + 1, newPassengers, deaths, node.state.carriedPassengers, calcBoxes(updatedShips),
-					node.state.retrievedBoxes, updatedShips);
+					node.state.retrievedBoxes,calcLostBoxes(updatedShips), updatedShips);
 			newNode = new node(node, operator.Right, node.depth + 1, pathCost(newState), newState);
 			newNode.Solution = node.Solution + "right,";
 			break;
 		case Retrieve:
 			int retrieved = node.state.retrievedBoxes + 1;
 			newState = new state(x, y, newPassengers, deaths, node.state.carriedPassengers, calcBoxes(updatedShips),
-					retrieved, updatedShips);
+					retrieved,calcLostBoxes(updatedShips), updatedShips);
 			newNode = new node(node, operator.Retrieve, node.depth + 1, pathCost(newState), newState);
 			newNode.Solution = node.Solution + "retrieve,";
 			break;
 		case Pickup:
 
 			newState = new state(x, y, newPassengers, deaths, calcCarried(node, updatedShips), calcBoxes(updatedShips),
-					node.state.retrievedBoxes, updatedShips);
+					node.state.retrievedBoxes, calcLostBoxes(updatedShips),updatedShips);
 			newNode = new node(node, operator.Pickup, node.depth + 1, pathCost(newState), newState);
 			newNode.Solution = node.Solution + "pickup,";
-			updateTime(grid, newNode, operation);
+			//updateTime(grid, newNode, operation);
 			break;
 		case Drop:
 
 			newState = new state(x, y, newPassengers, deaths, 0, calcBoxes(updatedShips), node.state.retrievedBoxes,
-					updatedShips);
+					calcLostBoxes(updatedShips),updatedShips);
 			newNode = new node(node, operator.Drop, node.depth + 1, pathCost(newState), newState);
 			newNode.Solution = node.Solution + "drop,";
 			break;
@@ -525,10 +550,7 @@ public class CoastGuard extends GenericSearchProblem {
 		for(int i = 0; i<node.state.ships.size(); i++) {
 			
 			ship newShip = new ship(node.state.ships.get(i).x, node.state.ships.get(i).y, node.state.ships.get(i).numberOfPassengers, node.state.ships.get(i).BlackBoxHp, node.state.ships.get(i).isWreck, node.state.ships.get(i).hasBlackBox); 
-			
-			
-			
-			
+
 			if(newShip.x == node.state.x && newShip.y == node.state.y) {
 				switch (operation) {
 				case Retrieve:
@@ -542,10 +564,14 @@ public class CoastGuard extends GenericSearchProblem {
 
 					if (newShip.numberOfPassengers > x) {
 						newShip.numberOfPassengers -= x;
-					} else {
+					} else if(newShip.numberOfPassengers == x){
+						newShip.numberOfPassengers = 0;
+						//newShip.isWreck = true;
+					}
+					else{
 
 						newShip.numberOfPassengers = 0;
-						newShip.isWreck = true;
+						//newShip.isWreck = true;
 					}
 
 					break;
@@ -554,7 +580,7 @@ public class CoastGuard extends GenericSearchProblem {
 				}
 			}
 			//update
-			if(operation != operator.Pickup) {
+			//if(operation != operator.Pickup) {
 				if(newShip.isWreck == true && newShip.hasBlackBox == true) {
 					
 					if(newShip.BlackBoxHp<20) {
@@ -567,14 +593,14 @@ public class CoastGuard extends GenericSearchProblem {
 					}
 				}
 				
-				if(newShip.BlackBoxHp == 20) {
+				if(newShip.BlackBoxHp >= 20) {
 					newShip.hasBlackBox = false;
 					newShip.isWreck = true;
 				}
 				if(newShip.numberOfPassengers <= 0) {
 					newShip.isWreck = true;
 				}
-			}
+			//}
 			newShipList.add(newShip);
 		}
 		return newShipList;
@@ -598,7 +624,7 @@ public class CoastGuard extends GenericSearchProblem {
 //				System.out.println("Box: " + node.state.ships.get(i).hasBlackBox);
 //				System.out.println("failllllll");
 //			}
-			if(node.state.ships.get(i).BlackBoxHp == 20) {
+			if(node.state.ships.get(i).BlackBoxHp > 20) {
 				node.state.ships.get(i).hasBlackBox = false;
 				node.state.ships.get(i).isWreck = true;
 			}
@@ -613,7 +639,7 @@ public class CoastGuard extends GenericSearchProblem {
 	static int calcPassDecrements(node node) {
 		int Sum = 0;
 		for (int i = 0; i < node.state.ships.size(); i++) {
-			if (!node.state.ships.get(i).isWreck && node.state.ships.get(i).numberOfPassengers > 0) {
+			if (node.state.ships.get(i).isWreck == false && node.state.ships.get(i).hasBlackBox == true && node.state.ships.get(i).numberOfPassengers > 0) {
 				Sum += 1;
 			}
 		}
@@ -739,11 +765,14 @@ public class CoastGuard extends GenericSearchProblem {
 		String grid9 = "7,5;100;3,4;2,6,3,5;0,0,4,0,1,8,1,4,77,1,5,1,3,2,94,4,3,46;";
 		String grid10= "10,6;59;1,7;0,0,2,2,3,0,5,3;1,3,69,3,4,80,4,7,94,4,9,14,5,2,39;";
 		
-		System.out.println(solve(grid0, "BF", false));
-		System.out.println(solve(grid0, "DF", false));
-		System.out.println(solve(grid0, "UC", false));
+		System.out.println(solve(grid2, "BF", true));
+		System.out.println(solve(grid2, "DF", true));
+		System.out.println(solve(grid2, "UC", true));
 		//System.out.println(solve(grid0, "ID", false));
-		System.out.println(solve(grid0, "GR1", true));
+		System.out.println(solve(grid2, "GR1", true));
+		System.out.println(solve(grid2, "GR2", true));
+		System.out.println(solve(grid2, "AS1", true));
+		System.out.println(solve(grid2, "AS2", true));
 		
 		
 //		grid FirstGrid = new grid(grid1);
@@ -779,13 +808,12 @@ public class CoastGuard extends GenericSearchProblem {
 		return 0;
 	}
 
-	public boolean are_there_BlackBoxes(node thisnode) {
+	public static boolean are_there_BlackBoxes(node thisnode) {
 
 		for (int i = 0; i < thisnode.state.ships.size(); i++) {
 			if (thisnode.state.ships.get(i).hasBlackBox) {
 				return true;
 			}
-
 		}
 
 		return false;
@@ -803,9 +831,9 @@ public class CoastGuard extends GenericSearchProblem {
 		return false;
 	}
 
-	public int priorityBlackBoxDecider(node thisnode) {
+	public static int priorityBlackBoxDecider(node thisnode) {
 
-		if (are_there_BlackBoxes(thisnode)) {
+		if (!are_there_BlackBoxes(thisnode)) {
 			int[] nearestBoxShip = nearest_Blackbox(thisnode.state.x, thisnode.state.y, thisnode);
 
 			int distance = distance_to_target(thisnode.state.x, thisnode.state.y, nearestBoxShip[0], nearestBoxShip[1]);
@@ -877,7 +905,7 @@ public class CoastGuard extends GenericSearchProblem {
 
 	}
 
-	public int[] nearest_Blackbox(int x, int y, node thisnode) {
+	public static int[] nearest_Blackbox(int x, int y, node thisnode) {
 
 		int[] shipLocation = { -1, -1 };
 		int min = 225;
