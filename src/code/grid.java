@@ -27,7 +27,7 @@ public class grid {
 		M = Integer.parseInt(MandN[0]);
 		N = Integer.parseInt(MandN[1]);
 		
-	
+		
 		maxNumberofPassengers = Integer.parseInt(temp[1]);
 		
 		//initial coast guard location
@@ -48,7 +48,7 @@ public class grid {
 			int x = Integer.parseInt(ships[i]);
 			int y = Integer.parseInt(ships[i+1]);
 			int Pass = Integer.parseInt(ships[i+2]);
-			ship thisShip = new ship(x,y,Pass);
+			ship thisShip = new ship(x,y,Pass, 20, false, true);
 			shipslist.add(thisShip);
 			
 		}
@@ -87,7 +87,7 @@ public class grid {
 	
 	public int isThisAShip(node node){
 		for(int i = 0;i<node.state.ships.size();i++) {
-			if(node.state.ships.get(i).x== node.state.x && node.state.ships.get(i).y== node.state.y) {
+			if(node.state.ships.get(i).x == node.state.x && node.state.ships.get(i).y== node.state.y) {
 				return i;
 			}
 		}
@@ -109,74 +109,82 @@ public class grid {
 			
 			int ShipNumber1 = isThisAShip(node);
 			if(ShipNumber1 != -1) {
-				if(node.state.ships.get(ShipNumber1).getNumberOfPassengers()>0) {
+				if(node.state.ships.get(ShipNumber1).numberOfPassengers>0 
+						&& node.state.ships.get(ShipNumber1).isWreck == false 
+						&& ((this.maxNumberofPassengers-node.state.carriedPassengers)>0)) {
 					return true;
-				}	
+				}
+				else {
+					return false;
+				}
 			}
 			else {
 				return false;
 			}
+			
 		}
 		
 		
 		if(operating== operator.Drop){
-			
-		
-			int numberOfPassengersOnBoard = node.state.carriedPassengers;
-			if(numberOfPassengersOnBoard > 0 && isThisAStation(node)) {
+
+			if(node.state.carriedPassengers> 0 && isThisAStation(node)) {
 				
 				return true;
-			
-			}else {
+			} else {
+				
 				return false;
 			}
-			
-			
+
 		}
 					
 	
 			
 		if(operating== operator.Retrieve){
 			
-			//get function to check the ammount of passengers on board\
+			//get function to check the amount of passengers on board\
 		
 			int stationNumber = isThisAShip(node);
 			if(stationNumber != -1) {
-				if(node.state.ships.get(stationNumber).isHasBlackBox()) {
+				if(node.state.ships.get(stationNumber).hasBlackBox == true && node.state.ships.get(stationNumber).isWreck == true && node.state.ships.get(stationNumber).BlackBoxHp>0) {
 					return true;
 				}
+				else {
+					return false;
+				}
+			}
+			else {
+					return false;
 			}
 		
-			
 		}
 		if(operating == operator.Up){
 			//if(y-1>0) {
 			//if(node.state.x-1>=0 && node.state.x-1<M) {
-			if(node.state.x-1>0) {
+			if(node.state.x-1>=0) {
 				return true;
 			}
 		}
-		if(operating== operator.Down){
+		if(operating == operator.Down){
 			//if(y+1<N) {
 			//if(node.state.x+1>0 && node.state.x+1<=M) {
-			if(node.state.x+1<M) {
+			if(node.state.x+1<N) {
 				return true;
 			}
 		}
-		if(operating== operator.Left){
+		if(operating == operator.Right){	
+			//if(x+1<M) {
+			if(node.state.y+1<M) {
+				return true;
+			}
+		}
+		if(operating == operator.Left){
 			//if(x-1>0) {
 			//if(node.state.y-1>0 && node.state.y-1<=N) {
-			if(node.state.y-1>0 ) {
+			if(node.state.y-1>=0 ) {
 				return true;
 			}
 		}
-		if(operating== operator.Right){	
-			//if(x+1<M) {
-			if(node.state.y+1<N) {
-				return true;
-			}
-		}
-			
+	
 		return false;
 	}
 
