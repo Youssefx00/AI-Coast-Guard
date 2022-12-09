@@ -2,8 +2,10 @@ package code;
 
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.random.RandomGenerator;
@@ -11,22 +13,38 @@ public class CoastGuard extends GenericSearchProblem{
 	
 	static int gridM = 0;
 	static int gridN = 0;
+	static int maxPassengers = 0;
 	static ArrayList<station> stationslist = new ArrayList<station>();
+	static int iterativeDepth = 0;
+	static HashMap<String, state> RepeatedStates;// 
 	
 	@SuppressWarnings("unused")
 	public static String solve(String grid,String strategy,Boolean visualize) {
-		
+		RepeatedStates = new HashMap<String, state>();
 		String Final_Solution = null;
 		grid FirstGrid = new grid(grid);
 		gridM = FirstGrid.M;
 		gridN = FirstGrid.N;
 		stationslist = FirstGrid.stationslist;
+		maxPassengers = FirstGrid.maxNumberofPassengers;
+		iterativeDepth=1;
 		//create initial node
 		state initialState = new state(FirstGrid.coastGuardX, FirstGrid.coastGuardY, calcPassengers(FirstGrid.shipslist), 0, 0, 0, 0, FirstGrid.shipslist);
-		node initialNode = new node(null, null, 0, 0, initialState);
 		
+		int[] pathCost = {0,0};
+		node initialNode = new node(null, null, 0, pathCost, initialState);
+		node goalNode = null;
 		//get goal node
-		node goalNode = General_Search_Procedure(FirstGrid, initialNode, strategy);
+		if(strategy == "ID") {
+			while(goalNode==null) {
+				goalNode = General_Search_Procedure(FirstGrid, initialNode, "ID");
+				iterativeDepth+=1;
+			}
+		}
+		else {
+
+			goalNode = General_Search_Procedure(FirstGrid, initialNode, strategy);
+		}
 		
 		//create String
 		String tempStr = goalNode.Solution;
@@ -35,38 +53,41 @@ public class CoastGuard extends GenericSearchProblem{
 		Final_Solution += ";" +goalNode.state.deaths +";";
 		Final_Solution += goalNode.state.retrievedBoxes +";";
 		Final_Solution += tempArr.length +"";
-		
+		//System.out.println(Final_Solution);
 		return Final_Solution;
 	}
 	 public static node General_Search_Procedure(grid grid, node initialNode, String strat) {
 		//Queue<node> nodes = new LinkedList<>();
-
-		Hashtable<String, node> RepeatedNodes = new Hashtable<String, node>();
+//			gridM = grid.M;
+//			gridN = grid.N;
+		//Hashtable<String, node> RepeatedNodes = new Hashtable<String, node>();
 		Deque<node> nodes = new LinkedList<>();
 		nodes.add(initialNode);
 		while (!nodes.isEmpty()) {
 			node currNode = nodes.removeFirst();
-			System.out.println("operator: " +currNode.operator);
-			System.out.println("depth: " +currNode.depth);
-			System.out.println("x: " +currNode.state.x);
-			System.out.println("y: " +currNode.state.y);
-			System.out.println("unrescued: " +currNode.state.unrescusedPassengers);
-			System.out.println("deaths: " +currNode.state.deaths);
-			System.out.println("carried: " +currNode.state.carriedPassengers);
-			System.out.println("undamaged: " +currNode.state.undamagedBoxes);
-			System.out.println("retrieved: " +currNode.state.retrievedBoxes);
-			System.out.println("ships: " +currNode.state.ships.size());
-			for(int i = 0; i<currNode.state.ships.size(); i++) {
-				System.out.println("Ship: " +(i+1)+":- "+ currNode.state.ships.get(i).numberOfPassengers + " , BlackBoxHP: "+ currNode.state.ships.get(i).BlackBoxHp);
-			}
-			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-			
+//			System.out.println("operator: " +currNode.operator);
+//			System.out.println("depth: " +currNode.depth);
+//			System.out.println("pathCost: " +currNode.pathCost[0] + ", " + currNode.pathCost[1]);
+//			System.out.println("x: " +currNode.state.x);
+//			System.out.println("y: " +currNode.state.y);
+//			System.out.println("unrescued: " +currNode.state.unrescusedPassengers);
+//			System.out.println("deaths: " +currNode.state.deaths);
+//			System.out.println("carried: " +currNode.state.carriedPassengers);
+//			System.out.println("undamaged: " +currNode.state.undamagedBoxes);
+//			System.out.println("retrieved: " +currNode.state.retrievedBoxes);
+//			System.out.println("ships: " +currNode.state.ships.size());
+//			for(int i = 0; i<currNode.state.ships.size(); i++) {
+//				System.out.println("Ship: " +(i+1)+":- "+ currNode.state.ships.get(i).numberOfPassengers + " , BlackBoxHP: "+ currNode.state.ships.get(i).BlackBoxHp);
+//			}
+//			
+//			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+//			
 			if(GoalTest(currNode) == true) {
 				System.out.println("Success");
 				return currNode;
 			}
 			Deque<node> newNodes = new LinkedList<>();
-			newNodes = Expand(grid, currNode, RepeatedNodes);
+			newNodes = Expand(grid, currNode, strat);
 			nodes = QingFunc(nodes, newNodes, strat);
 			//System.out.println("GS expanded: " + nodes.size());
 			
@@ -75,7 +96,13 @@ public class CoastGuard extends GenericSearchProblem{
 		return null;
 
 	}
-
+	static boolean isFull(node node) {
+		boolean bool = false;
+		if(node.state.carriedPassengers>=maxPassengers) {
+			bool = true;
+		}
+		return bool;
+	}
 	static Deque<node> QingFunc (Deque<node> nodes, Deque<node> newNodes, String strat) {
 		//Deque<node> finalNodes = nodes;
 		Deque<node> finalNodes = new LinkedList<>();
@@ -92,14 +119,29 @@ public class CoastGuard extends GenericSearchProblem{
 			}
 			break;
 		case "ID":
+			
 			for(int i = 0; i< newNodes.size();i++) {
-				finalNodes.addFirst(newNodes.removeFirst());
+				node tempNode = newNodes.removeFirst();
+				if(tempNode.depth < iterativeDepth) {
+					finalNodes.addFirst(tempNode);
+				}
 			}
 			break;
-		case "GR1":
+		case "UC":
+			
+			PriorityQueue<node> pq = new PriorityQueue<node>();
 			for(int i = 0; i< newNodes.size();i++) {
-				finalNodes.addLast(newNodes.removeFirst());
+				pq.add(newNodes.removeFirst());
 			}
+			finalNodes.addAll(pq);
+			break;
+		case "GR1":
+			
+			PriorityQueue<node> pq1 = new PriorityQueue<node>();
+			for(int i = 0; i< newNodes.size();i++) {
+				pq1.add(newNodes.removeFirst());
+			}
+			finalNodes.addAll(pq1);
 			break;
 		case "GR2":
 			for(int i = 0; i< newNodes.size();i++) {
@@ -132,10 +174,11 @@ public class CoastGuard extends GenericSearchProblem{
 			
 			if(!thisShip.isWreck) {
 			map[thisShip.y][thisShip.x] = "Ship "+ "("+ thisShip.numberOfPassengers+ ")";
-		}else {
-			map[thisShip.y][thisShip.x] = "Wreck "+ "("+ thisShip.BlackBoxHp+ ")";
 			
-		}
+			}else {
+				map[thisShip.y][thisShip.x] = "Wreck "+ "("+ thisShip.BlackBoxHp+ ")";
+				
+			}
 		}
 		
 		for(int i = 0; i<stationslist.size();i++) {
@@ -143,7 +186,7 @@ public class CoastGuard extends GenericSearchProblem{
 			map[thisStation.x][thisStation.y] = "Station";
 			
 		}
-		map[theNode.state.y][theNode.state.x] = map[theNode.state.y][theNode.state.x] + "|| ship " +"("+ theNode.state.carriedPassengers+")"; 
+		map[theNode.state.y][theNode.state.x] = map[theNode.state.y][theNode.state.x] + "|| CoastGuard " +"("+ theNode.state.carriedPassengers+")"; 
 		
 		for(int i = 0; i<map.length;i++) {
 			System.out.println("");
@@ -156,57 +199,18 @@ public class CoastGuard extends GenericSearchProblem{
 		
 	}
 	
-	static Deque<node> Expand(grid grid,node node, Hashtable<String, node> RepeatedNodes) {
+	static Deque<node> Expand(grid grid,node node, String strat) {
 
 		Deque<node> nodes = new LinkedList<>();
 			//System.out.println("expand");
 		
 			operator parentOp = null;
+			
 			try{
 				parentOp = node.parentNode.operator;
 			}
 			catch(Exception e){
 				
-			}
-			if(grid.possiblemove(operator.Down, node) == true ) {
-			//if(grid.possiblemove(operator.Down, node) == true && parentOp != operator.Up) {
-
-				node newNode = createNode(grid, node, operator.Down);
-				String key = newNode.state.x + newNode.state.y +newNode.state.unrescusedPassengers +newNode.state.deaths +newNode.state.undamagedBoxes + newNode.state.retrievedBoxes +"";
-				if(!RepeatedNodes.contains(key)) {
-					nodes.addFirst(newNode);
-					RepeatedNodes.put(key, newNode);
-				}
-			}
-			if(grid.possiblemove(operator.Up, node) == true ) {
-			//if(grid.possiblemove(operator.Up, node) == true && parentOp != operator.Down) {
-				node newNode = createNode(grid, node, operator.Up);
-				String key = newNode.state.x + newNode.state.y +newNode.state.unrescusedPassengers +newNode.state.deaths +newNode.state.undamagedBoxes + newNode.state.retrievedBoxes +"";
-				if(!RepeatedNodes.contains(key)) {
-					nodes.addFirst(newNode);
-					RepeatedNodes.put(key, newNode);
-				}
-				
-			}
-			if(grid.possiblemove(operator.Left, node) == true) {
-			//if(grid.possiblemove(operator.Left, node) == true && parentOp != operator.Right) {
-
-				node newNode = createNode(grid, node, operator.Left);
-				String key = newNode.state.x + newNode.state.y +newNode.state.unrescusedPassengers +newNode.state.deaths +newNode.state.undamagedBoxes + newNode.state.retrievedBoxes +"";
-				if(!RepeatedNodes.contains(key)) {
-					nodes.addFirst(newNode);
-					RepeatedNodes.put(key, newNode);
-				}
-			}
-			if(grid.possiblemove(operator.Right, node) == true) {
-			//if(grid.possiblemove(operator.Right, node) == true && parentOp != operator.Left) {
-
-				node newNode = createNode(grid, node, operator.Right);
-				String key = newNode.state.x + newNode.state.y +newNode.state.unrescusedPassengers +newNode.state.deaths +newNode.state.undamagedBoxes + newNode.state.retrievedBoxes +"";
-				if(!RepeatedNodes.contains(key)) {
-					nodes.addFirst(newNode);
-					RepeatedNodes.put(key, newNode);
-				}
 			}
 			if(grid.possiblemove(operator.Drop, node) == true) {
 				
@@ -214,7 +218,7 @@ public class CoastGuard extends GenericSearchProblem{
 				
 			}
 			if(grid.possiblemove(operator.Pickup, node) == true) {
-							
+				
 				nodes.addFirst(createNode(grid, node, operator.Pickup));
 				
 			}
@@ -223,10 +227,66 @@ public class CoastGuard extends GenericSearchProblem{
 				nodes.addFirst(createNode(grid, node, operator.Retrieve));
 				
 			}
+
+			if(grid.possiblemove(operator.Right, node) == true) {
+			//if(grid.possiblemove(operator.Right, node) == true && parentOp != operator.Left) {
+
+				node newNode = createNode(grid, node, operator.Right);
+				String key = Integer.toString(newNode.state.x) + Integer.toString(newNode.state.y) + Integer.toString(newNode.state.unrescusedPassengers) + Integer.toString(newNode.state.deaths) + Integer.toString(newNode.state.undamagedBoxes) + Integer.toString(newNode.state.retrievedBoxes) + Shiphealths(newNode.state.ships)+"";
+				//if(!RepeatedNodes.contains(key)|| strat == "ID") {+
+				if(!RepeatedStates.containsKey(key)) {
+					nodes.addFirst(newNode);
+					RepeatedStates.put(key, newNode.state);
+				}
+			}
+
+
+			if(grid.possiblemove(operator.Up, node) == true ) {
+			//if(grid.possiblemove(operator.Up, node) == true && parentOp != operator.Down) {
+				node newNode = createNode(grid, node, operator.Up);
+				String key = Integer.toString(newNode.state.x) + Integer.toString(newNode.state.y) + Integer.toString(newNode.state.unrescusedPassengers) + Integer.toString(newNode.state.deaths) + Integer.toString(newNode.state.undamagedBoxes) + Integer.toString(newNode.state.retrievedBoxes) + Shiphealths(newNode.state.ships)+"";
+				//if(!RepeatedNodes.contains(key)|| strat == "ID") {
+				if(!RepeatedStates.containsKey(key)) {
+					nodes.addFirst(newNode);
+					RepeatedStates.put(key, newNode.state);
+				}
+			}
+
+			if(grid.possiblemove(operator.Left, node) == true) {
+			//if(grid.possiblemove(operator.Left, node) == true && parentOp != operator.Right) {
+
+				node newNode = createNode(grid, node, operator.Left);
+				String key = Integer.toString(newNode.state.x) + Integer.toString(newNode.state.y) + Integer.toString(newNode.state.unrescusedPassengers) + Integer.toString(newNode.state.deaths) + Integer.toString(newNode.state.undamagedBoxes) + Integer.toString(newNode.state.retrievedBoxes) + Shiphealths(newNode.state.ships)+"";
+				//if(!RepeatedNodes.contains(key)|| strat == "ID") {
+				if(!RepeatedStates.containsKey(key)) {
+					nodes.addFirst(newNode);
+					RepeatedStates.put(key, newNode.state);
+				}
+			}
+			if(grid.possiblemove(operator.Down, node) == true ) {
+			//if(grid.possiblemove(operator.Down, node) == true && parentOp != operator.Up) {
+
+				node newNode = createNode(grid, node, operator.Down);
+				String key = Integer.toString(newNode.state.x) + Integer.toString(newNode.state.y) + Integer.toString(newNode.state.unrescusedPassengers) + Integer.toString(newNode.state.deaths) + Integer.toString(newNode.state.undamagedBoxes) + Integer.toString(newNode.state.retrievedBoxes) + Shiphealths(newNode.state.ships)+"";
+				//if(!RepeatedNodes.contains(key) || strat == "ID") {
+				if(!RepeatedStates.containsKey(key)) {
+					nodes.addFirst(newNode);
+					RepeatedStates.put(key, newNode.state);
+				}
+			}
+
+
+
 			//System.out.println("expanded: "+ nodes.size() + " nodes");
 		return nodes;
 	}
-	
+	static String Shiphealths(ArrayList<ship> ships) {
+		String x = "";
+		for(int i = 0; i< ships.size();i++) {
+			x+= ships.get(i).BlackBoxHp +"";
+		}
+		return x;
+	}
 	static Boolean GoalTest(node node) {
 		//if(hasBlaxBoxes == false && node.state.unrescusedPassengers == 0 && node.state.undamagedBoxes == 0 && node.state.carriedPassengers == 0) {
 		if(node.state.unrescusedPassengers <= 0 && node.state.undamagedBoxes <= 0 && node.state.carriedPassengers <= 0) {
@@ -235,10 +295,10 @@ public class CoastGuard extends GenericSearchProblem{
 		}
 		return false;
 	}
-	@Override
-	int PathCost(node node) {
-		// TODO Auto-generated method stub
-		return 0;
+
+	static int[] pathCost(state state) {
+		int[] pathCost = { state.deaths, state.retrievedBoxes};
+		return pathCost;
 	}
 	static int calcPassengers (ArrayList<ship> ships) {
 		int Sum = 0;
@@ -252,7 +312,7 @@ public class CoastGuard extends GenericSearchProblem{
 	static int calcBoxes (ArrayList<ship> ships) {
 		int Sum = 0;
 		for(int i = 0; i< ships.size();i++) {
-			if(ships.get(i).hasBlackBox == true && ships.get(i).isWreck == true) {
+			if(ships.get(i).hasBlackBox == true && ships.get(i).isWreck == true && ships.get(i).BlackBoxHp>1 ) {
 				Sum += 1;
 			}
 		}
@@ -277,57 +337,50 @@ public class CoastGuard extends GenericSearchProblem{
 		int deaths = calcPassengers(grid.shipslist)-newPassengers;
 		int x = node.state.x;
 		int y = node.state.y;
+		
 		switch(operation) {
 		case Up: 
 			newState = new state(x-1, y, newPassengers, deaths , node.state.carriedPassengers, calcBoxes(updatedShips), node.state.retrievedBoxes, updatedShips);
-			newNode = new node(node, operator.Up, node.depth+1, 0, newState);
+			newNode = new node(node, operator.Up, node.depth+1, pathCost(newState), newState);
 			newNode.Solution = node.Solution + "up,";
 			break;
 		case Down: 
 			newState = new state(x+1, y, newPassengers, deaths, node.state.carriedPassengers, calcBoxes(updatedShips), node.state.retrievedBoxes, updatedShips);
-			newNode = new node(node, operator.Down, node.depth+1, 0, newState);
+			newNode = new node(node, operator.Down, node.depth+1, pathCost(newState), newState);
 			newNode.Solution = node.Solution +"down,";
 			break;
 		case Left: 
 			newState = new state(x, y-1, newPassengers, deaths, node.state.carriedPassengers, calcBoxes(updatedShips), node.state.retrievedBoxes, updatedShips);
-			newNode = new node(node, operator.Left, node.depth+1, 0, newState);
+			newNode = new node(node, operator.Left, node.depth+1, pathCost(newState), newState);
 			newNode.Solution = node.Solution + "left,";
 			break;
 		case Right: 
 			newState = new state(x, y+1, newPassengers, deaths, node.state.carriedPassengers, calcBoxes(updatedShips), node.state.retrievedBoxes, updatedShips);
-			newNode = new node(node, operator.Right, node.depth+1, 0, newState);
+			newNode = new node(node, operator.Right, node.depth+1, pathCost(newState), newState);
 			newNode.Solution = node.Solution + "right,";
 			break;
 		case Retrieve: 
 			int retrieved = node.state.retrievedBoxes+1;
 			newState = new state(x, y, newPassengers, deaths, node.state.carriedPassengers, calcBoxes(updatedShips), retrieved, updatedShips);
-			newNode = new node(node, operator.Retrieve, node.depth+1, 0, newState);
+			newNode = new node(node, operator.Retrieve, node.depth+1, pathCost(newState), newState);
 			newNode.Solution = node.Solution + "retrieve,";
 			break;
 		case Pickup: 
-			int Pass = node.state.carriedPassengers;
 			
-			for(int i = 0; i< updatedShips.size();i++) {
-				if(updatedShips.get(i).x == node.state.x && updatedShips.get(i).y == node.state.y) {
-					Pass += (node.state.ships.get(i).numberOfPassengers-updatedShips.get(i).numberOfPassengers);
-				}
-			}
-			
-			newState = new state(x, y, newPassengers, deaths, Pass, calcBoxes(updatedShips), node.state.retrievedBoxes, updatedShips);
-			newNode = new node(node, operator.Pickup, node.depth+1, 0, newState);
-			newNode.Solution =node.Solution + "pickup,";
+			newState = new state(x, y, newPassengers, deaths, calcCarried(node, updatedShips), calcBoxes(updatedShips), node.state.retrievedBoxes, updatedShips);
+			newNode = new node(node, operator.Pickup, node.depth+1, pathCost(newState), newState);
+			newNode.Solution = node.Solution + "pickup,";
 			updateTime(grid, newNode, operation);
 			break;
 		case Drop: 
 			
 			newState = new state(x, y, newPassengers, deaths, 0, calcBoxes(updatedShips), node.state.retrievedBoxes, updatedShips);
-			newNode = new node(node, operator.Drop, node.depth+1, 0, newState);
+			newNode = new node(node, operator.Drop, node.depth+1, pathCost(newState), newState);
 			newNode.Solution = node.Solution + "drop,";
 			break;
 		default:
 			break;
 		}
-		
 		return newNode;
 	}
 
@@ -341,16 +394,23 @@ public class CoastGuard extends GenericSearchProblem{
 				switch (operation) {
 				case Retrieve:
 					newShip.hasBlackBox = false;
+					newShip.isWreck = true;
+					newShip.BlackBoxHp = 0;
 					break;
 				case Pickup:
 					
-					int x = grid.maxNumberofPassengers-node.state.carriedPassengers;
+					int x = grid.maxNumberofPassengers - node.state.carriedPassengers;
+					
 					if(newShip.numberOfPassengers>x) {
 						newShip.numberOfPassengers -= x;
-					} else if(newShip.numberOfPassengers == x){
+					} else{
+						
 						newShip.numberOfPassengers = 0;
 						newShip.isWreck = true;
 					}
+					
+					break;
+				default:
 					break;
 				}
 			}
@@ -360,17 +420,19 @@ public class CoastGuard extends GenericSearchProblem{
 					if(newShip.BlackBoxHp>0) {
 						newShip.BlackBoxHp -=1;
 					}
-					if(newShip.BlackBoxHp == 0) {
-						newShip.hasBlackBox = false;
-					}
+
 				} 
-				else {
+				else if(newShip.isWreck == false && newShip.hasBlackBox == true){
 					if(newShip.numberOfPassengers>0) {
 						newShip.numberOfPassengers-=1;
 					}
-					if(newShip.numberOfPassengers == 0) {
-						newShip.isWreck = true;
-					}
+				}
+				
+				if(newShip.BlackBoxHp == 0) {
+					newShip.hasBlackBox = false;
+				}
+				if(newShip.numberOfPassengers == 0) {
+					newShip.isWreck = true;
 				}
 			}
 			newShipList.add(newShip);
@@ -378,24 +440,25 @@ public class CoastGuard extends GenericSearchProblem{
 		return newShipList;
 	}
 	static void updateTime(grid grid,node node, operator operation){
+		
 		for(int i = 0; i<node.state.ships.size(); i++) {
-			
-
 			if(node.state.ships.get(i).isWreck == true && node.state.ships.get(i).hasBlackBox == true) {
 				if(node.state.ships.get(i).BlackBoxHp>0) {
 					node.state.ships.get(i).BlackBoxHp -=1;
 				}
-				if(node.state.ships.get(i).BlackBoxHp == 0) {
-					node.state.ships.get(i).hasBlackBox = false;
-				}
+
 			} 
-			else {
+			else if(node.state.ships.get(i).isWreck == false && node.state.ships.get(i).hasBlackBox == true){
 				if(node.state.ships.get(i).numberOfPassengers>0) {
 					node.state.ships.get(i).numberOfPassengers-=1;
 				}
-				if(node.state.ships.get(i).numberOfPassengers == 0) {
-					node.state.ships.get(i).isWreck = true;
-				}
+
+			}
+			if(node.state.ships.get(i).BlackBoxHp == 0) {
+				node.state.ships.get(i).hasBlackBox = false;
+			}
+			if(node.state.ships.get(i).numberOfPassengers == 0) {
+				node.state.ships.get(i).isWreck = true;
 			}
 			
 		}
@@ -538,6 +601,7 @@ public class CoastGuard extends GenericSearchProblem{
 		
 	}
 
+	
 	public static void main(String[] args) {
 		
 		String grid0 = "5,6;50;0,1;0,4,3,3;1,1,90;";
@@ -552,7 +616,13 @@ public class CoastGuard extends GenericSearchProblem{
 		String grid9 = "7,5;100;3,4;2,6,3,5;0,0,4,0,1,8,1,4,77,1,5,1,3,2,94,4,3,46;";
 		String grid10= "10,6;59;1,7;0,0,2,2,3,0,5,3;1,3,69,3,4,80,4,7,94,4,9,14,5,2,39;";
 		
-		//System.out.println(solve(grid, "BF", false));
-		System.out.println(solve(grid1, "BF", false));
+		System.out.println(solve(grid5, "BF", false));
+		System.out.println(solve(grid5, "UC", false));
+		
+//		grid FirstGrid = new grid(grid1);
+//		state initialState = new state(FirstGrid.coastGuardX, FirstGrid.coastGuardY, calcPassengers(FirstGrid.shipslist), 0, 0, 0, 0, FirstGrid.shipslist);
+//		int[] pathCost = {0,0};
+//		node initialNode = new node(null, null, 0, pathCost, initialState);
+//		Visualise(General_Search_Procedure(FirstGrid, initialNode, "UC"));
 	}
 }
