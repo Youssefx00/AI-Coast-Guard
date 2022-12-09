@@ -48,7 +48,7 @@ public class grid {
 			int x = Integer.parseInt(ships[i]);
 			int y = Integer.parseInt(ships[i+1]);
 			int Pass = Integer.parseInt(ships[i+2]);
-			ship thisShip = new ship(x,y,Pass, 20, false, true);
+			ship thisShip = new ship(x,y,Pass, 1, false, true);
 			shipslist.add(thisShip);
 			
 		}
@@ -199,11 +199,10 @@ public class grid {
 		
 			int stationNumber = isThisAShip(node);
 			if(stationNumber != -1) {
-				if(node.state.ships.get(stationNumber).hasBlackBox == true && node.state.ships.get(stationNumber).isWreck == true && node.state.ships.get(stationNumber).BlackBoxHp>0) {
+				if(node.state.ships.get(stationNumber).hasBlackBox == true 
+						&& node.state.ships.get(stationNumber).isWreck == true 
+						&& node.state.ships.get(stationNumber).BlackBoxHp<20) {
 					return true;
-				}
-				else {
-					return false;
 				}
 			}
 			else {

@@ -4,7 +4,7 @@ public class ship {
 	int x;
 	int y;
 	int numberOfPassengers;
-	int BlackBoxHp = 20;
+	int BlackBoxHp = 1;
 	boolean isWreck;
 	boolean hasBlackBox;
 	
