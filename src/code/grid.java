@@ -55,63 +55,9 @@ public class grid {
 	
 	}
 
-	public int distance_to_target(int PlayerX, int PlayerY,int TargetX, int TargetY) {
-		int total = 0;
-		int x = PlayerX - TargetX;
-		int y = PlayerY - TargetY;
-		x = Math.abs(x);
-		y = Math.abs(y);
-		total = x+y;
-		return total;
-		
-	}
 	
-	public int[] nearest_Human_ship(int x, int y) {
-		
-		int [] shipLocation = {-1,-1};
-		int min = 225;
-		for(int i = 0; i<shipslist.size();i++) {
-			if(shipslist.get(i).are_there_people_here()) {
-				int shipDistance = distance_to_target(x , y , shipslist.get(i).x,shipslist.get(i).y);
-				if(shipDistance < min) {
-					min = shipDistance;
-					shipLocation[0] = shipslist.get(i).x;
-					shipLocation[1] = shipslist.get(i).y;
-					}
-				}
-			}
-		
-		return shipLocation;
-		
-	}
 	
-	public int[] nearest_Blackbox(int x, int y) {
-		
-		int [] shipLocation = {-1,-1};
-		int min = 225;
-		for(int i = 0; i<shipslist.size();i++) {
-			if(shipslist.get(i).hasBlackBox) {
-				int shipDistance = distance_to_target(x , y , shipslist.get(i).x,shipslist.get(i).y);
-				if(shipDistance < min) {
-					min = shipDistance;
-					shipLocation[0] = shipslist.get(i).x;
-					shipLocation[1] = shipslist.get(i).y;
-					}
-				}
-			}
-		
-		return shipLocation;
-		
-	}
 	
-	public ship getShip(int x,int y){
-		for(int i = 0;i<shipslist.size();i++) {
-			if(shipslist.get(i).x== x && shipslist.get(i).y==y) {
-				return shipslist.get(i);
-			}
-		}
-		return null;
-	}
 	
 	public boolean are_there_BlackBoxes() {
 		
